@@ -1,0 +1,26 @@
+table {
+  width: 100%;
+  margin: 15px 0;
+}
+td, th {
+  padding: 4px;
+}
+td.rev {
+  text-align: right;
+}
+td.key {
+  font-weight: bold;
+}
+
+tr.rendered {
+  display: table-row;
+  vertical-align: top;
+}
+tr.rendered:nth-child(odd) {
+  background: #eee;
+}
+tr.values:nth-child(even) {
+  background: #ccc;
+}
+
+

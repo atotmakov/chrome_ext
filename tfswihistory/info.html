@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<!--
+ * Copyright (c) 2010 The Chromium Authors. All rights reserved.  Use of this
+ * source code is governed by a BSD-style license that can be found in the
+ * LICENSE file.
+-->
+<html>
+  <head>
+    <script src="imageinfo/binaryajax.js"></script>
+    <script src="imageinfo/imageinfo.js" ></script>
+    <script src="imageinfo/exif.js" ></script>
+    <link href="info.css" rel="stylesheet" type="text/css"></link>
+    <script src="info.js"></script>
+  </head>
+  <body>
+    <div id="loader">
+      Loading... <img src="loader.gif" />
+    </div>
+    <div id="output">
+      <div id="info">
+        <h1 id="url"></h1>
+        <code id="url1"></code>
+        <!--canvas id="thumbnail"></!--canvas-->
+        <table>
+          <tbody id="tbody"></tbody>
+        </table>
+      </div>
+    </div>
+  </body>
+</html>

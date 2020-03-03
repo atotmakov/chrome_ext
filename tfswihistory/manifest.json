@@ -1,0 +1,14 @@
+{
+  "name" : "TFS workitem info",
+  "version" : "1.0.0",
+  "description" : "Get info for TFS workitems, including history data",
+  "background" : { "scripts": ["background.js"] },
+  "permissions" : [
+    "contextMenus",
+    "tabs",
+    "http://*/*",
+    "https://*/*"
+   ],
+  "minimum_chrome_version" : "6.0.0.0",
+  "manifest_version": 2
+}
