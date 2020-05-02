@@ -5,14 +5,14 @@ function getClickHandler() {
     var url = 'info.html#' + info.selectionText;
 
     // Create a new window to the info page.
-    chrome.windows.create({ url: url, width: 520, height: 660 });
+    browser.windows.create({ url: url, width: 520, height: 660 });
   };
 };
 
 /**
  * Create a context menu which will only show up for images.
  */
-chrome.contextMenus.create({
+browser.contextMenus.create({
   "title" : "Get TFS Workitem Histrory", 
   "type" : "normal",
   "contexts" : ["selection"],

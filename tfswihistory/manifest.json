@@ -1,8 +1,9 @@
 {
   "name" : "TFS workitem info",
+  "author" : "atotmakov",
   "version" : "1.0.0",
   "description" : "Get info for TFS workitems, including history data",
-  "background" : { "scripts": ["background.js"] },
+  "background" : { "scripts": ["background.js"], "persistent": true },
   "permissions" : [
     "contextMenus",
     "tabs",
