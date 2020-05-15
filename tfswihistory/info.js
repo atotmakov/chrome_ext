@@ -78,13 +78,13 @@ function renderImageInfo(imageinfo, revisionsAutors) {
 /**
  * Renders the URL for the image, trimming if the length is too long.
  */
-function renderUrl(url, s) {
+function renderUrl(title, url) {
   var divurl = document.querySelector('#url');
     
   
-  var urltext = url + ': ' + s;
+  var urltext = title;
   var anchor = document.createElement('a');
-  anchor.href = 'https://hqrndtfs.avp.ru/tfs/DefaultCollection/Core_Technologies/_workitems/edit/' + url;
+  anchor.href = url;
   anchor.innerText = urltext;
   divurl.appendChild(anchor);
 };
@@ -134,19 +134,34 @@ function formatDateTimeSkipOther(str) {
 }
 
 
-function getImageInfoHandler(url) {
+function getImageInfoHandler(tfs_url, wi_id) {
   return function() {
     
-//    var urljson = 'https://hqrndtfs.avp.ru/tfs/DefaultCollection/Core_Technologies/_apis/wit/workitems/' + url + '?api-version=5.1'
-    var urljson = 'https://hqrndtfs.avp.ru/tfs/DefaultCollection/_apis/wit/workItems/' + url + '/revisions?api-version=5.1'
+    var urljson = tfs_url + '/_apis/wit/workItems/' + wi_id + '/revisions?api-version=5.1'
     var xmlHttp = new XMLHttpRequest();
-    xmlHttp.open( "GET", urljson, false ); // false for synchronous request
+    xmlHttp.open( "GET", urljson, true ); // false for synchronous request
+
+    xmlHttp.onload = function (e) {
+      if (xmlHttp.readyState === 4) {
+        if (xmlHttp.status === 200) {
+          getImageInfoHandler1(tfs_url, wi_id, xmlHttp.responseText);
+        } else {
+          console.error(xmlHttp.statusText);
+        }
+      }
+    };
+    xmlHttp.onerror = function (e) {
+      console.error(xmlHttp.statusText);
+    };
     xmlHttp.send( null );
-    var obj = JSON.parse(xmlHttp.response);
+}
+
+function getImageInfoHandler1(tfs_url, wi_id, response) {
+
+//    var obj = JSON.parse(xmlHttp.response);
+    var obj = JSON.parse(response);
     var f = obj.value[0].fields;
     var s = f['System.Title'];
-  
-
     
     var revisionsAutors = [];
     var fieldsset = [];
@@ -182,7 +197,7 @@ function getImageInfoHandler(url) {
     
     
 
-    renderUrl(url, s);
+    renderUrl(wi_id + ':' + s, tfs_url + '/_workitems/edit/' + wi_id);
     //renderThumbnail(url);
     //var imageinfo = ImageInfo.getAllFields(url);
     renderImageInfo(fieldsset, revisionsAutors);
@@ -195,10 +210,11 @@ function getImageInfoHandler(url) {
  */
 document.addEventListener("DOMContentLoaded", function () {
   // The URL of the image to load is passed on the URL fragment.
-  var imageUrl = window.location.hash.substring(1);
-  if (imageUrl) {
+  var wi_id = window.location.hash.substring(1);
+  var tfs_url = window.location.search.substring(1);
+  if (tfs_url) {
     // Use the ImageInfo library to load the image and parse it.
-    getImageInfoHandler(imageUrl)();
+    getImageInfoHandler(tfs_url, wi_id)();
     //ImageInfo.loadInfo(imageUrl, getImageInfoHandler(imageUrl));
   }
 });

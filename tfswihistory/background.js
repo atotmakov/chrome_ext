@@ -1,18 +1,48 @@
+function parseURL(url) {
+
+    var parser = document.createElement('a'),
+        searchObject = {},
+        queries, split, i;
+
+    // Let the browser do the work
+    parser.href = url;
+
+    // Convert query string to object
+    queries = parser.search.replace(/^\?/, '').split('&');
+    for( i = 0; i < queries.length; i++ ) {
+        split = queries[i].split('=');
+        searchObject[split[0]] = split[1];
+    }
+
+    return {
+        protocol: parser.protocol,
+        host: parser.host,
+        hostname: parser.hostname,
+        port: parser.port,
+        pathname: parser.pathname,
+        search: parser.search,
+        searchObject: searchObject,
+        hash: parser.hash
+    };
+
+}
+
 function getClickHandler() {
   return function(info, tab) {
 
-    // The srcUrl property is only available for image elements.
-    var url = 'info.html#' + info.selectionText;
+    var urll = info.pageUrl;//parseURL(info.pageUrl);
 
-    // Create a new window to the info page.
-    browser.windows.create({ url: url, width: 520, height: 660 });
+    var pn = urll.indexOf('/_');
+
+    var f = urll.substring(0,pn);
+
+    var url = 'info.html?' + f + '#' + info.selectionText;
+
+    chrome.windows.create({ url: url });
   };
 };
 
-/**
- * Create a context menu which will only show up for images.
- */
-browser.contextMenus.create({
+chrome.contextMenus.create({
   "title" : "Get TFS Workitem Histrory", 
   "type" : "normal",
   "contexts" : ["selection"],
