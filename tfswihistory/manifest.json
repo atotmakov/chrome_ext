@@ -1,12 +1,11 @@
 {
-  "name" : "TFS workitem info",
+  "name" : "Azure DevOps workitem info",
   "author" : "atotmakov",
-  "version" : "1.0.0",
-  "description" : "Get info for TFS workitems, including history data",
+  "version" : "0.0.0.1",
+  "description" : "Get info for Azure DevOps workitems, including history data",
   "background" : { "scripts": ["background.js"], "persistent": true },
   "permissions" : [
     "contextMenus",
-    "tabs",
     "http://*/*",
     "https://*/*"
    ],

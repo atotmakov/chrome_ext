@@ -14,28 +14,12 @@ function renderCells(cells, data, revisionsAutors) {
             
       s += '</table>';
 
-      tr += '<td class="key">' + key + '</td>' + '<td>' + s + '</td></tr>';
+      tr += '<td class="key"><input type="checkbox" id="' + key + '" checked>' + key + '</td>' + '<td>' + s + '</td></tr>';
 
       tbody.innerHTML += tr;
   }
 };
 
-
-/**
- * Returns true if the supplies object has no properties.
- */
-function isEmpty(obj) {
-  for (var key in obj) {
-    if (obj.hasOwnProperty(key)) {
-      return false;
-    }
-  }
-  return true;
-};
-
-/**
- * Resizes the window to the current dimensions of this page's body.
- */
 function resizeWindow() {
   window.setTimeout(function() {
     chrome.tabs.getCurrent(function (tab) {
@@ -48,12 +32,7 @@ function resizeWindow() {
   }, 150);
 };
 
-/**
- * Called directly by the background page with information about the
- * image.  Outputs image data to the DOM.
- */
-function renderImageInfo(imageinfo, revisionsAutors) {
-  //console.log('imageinfo', imageinfo);
+function renderWIInfo(imageinfo, revisionsAutors) {
 
   var divloader = document.querySelector('#loader');
   var divoutput = document.querySelector('#output');
@@ -63,22 +42,13 @@ function renderImageInfo(imageinfo, revisionsAutors) {
   var divinfo = document.querySelector('#info');
   var divexif = document.querySelector('#exif');
 
-  // Render general image data.
+
   var datacells = divinfo.querySelectorAll('td');
   renderCells(datacells, imageinfo, revisionsAutors);
 
-  // If EXIF data exists, unhide the EXIF table and render.
-  /*if (imageinfo['exif'] && !isEmpty(imageinfo['exif'])) {
-    divexif.style.display = 'block';
-    var exifcells = divexif.querySelectorAll('td');
-    renderCells(exifcells, imageinfo['exif']);
-  }*/
 };
 
-/**
- * Renders the URL for the image, trimming if the length is too long.
- */
-function renderUrl(title, url) {
+function renderWITitle(title, url) {
   var divurl = document.querySelector('#url');
     
   
@@ -89,39 +59,6 @@ function renderUrl(title, url) {
   divurl.appendChild(anchor);
 };
 
-/**
- * Renders a thumbnail view of the image.
- */
-function renderThumbnail(url) {
-  var canvas = document.querySelector('#thumbnail');
-  var context = canvas.getContext('2d');
-
-  canvas.width = 100;
-  canvas.height = 100;
-
-  var image = new Image();
-  image.addEventListener('load', function() {
-    var src_w = image.width;
-    var src_h = image.height;
-    var new_w = canvas.width;
-    var new_h = canvas.height;
-    var ratio = src_w / src_h;
-    if (src_w > src_h) {
-      new_h /= ratio;
-    } else {
-      new_w *= ratio;
-    }
-    canvas.width = new_w;
-    canvas.height = new_h;
-    context.drawImage(image, 0, 0, src_w, src_h, 0, 0, new_w, new_h);
-  });
-  image.src = url;
-};
-
-/**
- * Returns a function which will handle displaying information about the
- * image once the ImageInfo class has finished loading.
- */
 
 function formatDateTimeSkipOther(str) {
  var res = str; //str = "2019-10-17T08:56:08.573Z"
@@ -135,8 +72,6 @@ function formatDateTimeSkipOther(str) {
 
 
 function getImageInfoHandler(tfs_url, wi_id) {
-  return function() {
-    
     var urljson = tfs_url + '/_apis/wit/workItems/' + wi_id + '/revisions?api-version=5.1'
     var xmlHttp = new XMLHttpRequest();
     xmlHttp.open( "GET", urljson, true ); // false for synchronous request
@@ -150,15 +85,11 @@ function getImageInfoHandler(tfs_url, wi_id) {
         }
       }
     };
-    xmlHttp.onerror = function (e) {
-      console.error(xmlHttp.statusText);
-    };
     xmlHttp.send( null );
 }
 
 function getImageInfoHandler1(tfs_url, wi_id, response) {
 
-//    var obj = JSON.parse(xmlHttp.response);
     var obj = JSON.parse(response);
     var f = obj.value[0].fields;
     var s = f['System.Title'];
@@ -197,24 +128,24 @@ function getImageInfoHandler1(tfs_url, wi_id, response) {
     
     
 
-    renderUrl(wi_id + ':' + s, tfs_url + '/_workitems/edit/' + wi_id);
-    //renderThumbnail(url);
-    //var imageinfo = ImageInfo.getAllFields(url);
-    renderImageInfo(fieldsset, revisionsAutors);
+    renderWITitle(wi_id + ':' + s, tfs_url + '/_workitems/edit/' + wi_id);
+    renderWIInfo(fieldsset, revisionsAutors);
     resizeWindow();
-  };
-};
 
-/**
- * Load the image in question and display it, along with its metadata.
- */
+    for (let checkbox of document.querySelectorAll('input[type=checkbox]')) {
+      checkbox.addEventListener( 'change', function() {
+        this.parentElement.nextElementSibling.hidden = !this.checked; 
+    });
+    }
+
+}
+
+
 document.addEventListener("DOMContentLoaded", function () {
-  // The URL of the image to load is passed on the URL fragment.
   var wi_id = window.location.hash.substring(1);
   var tfs_url = window.location.search.substring(1);
   if (tfs_url) {
-    // Use the ImageInfo library to load the image and parse it.
-    getImageInfoHandler(tfs_url, wi_id)();
-    //ImageInfo.loadInfo(imageUrl, getImageInfoHandler(imageUrl));
+    getImageInfoHandler(tfs_url, wi_id);
   }
 });
+
