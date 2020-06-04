@@ -23,4 +23,11 @@ tr.values:nth-child(even) {
   background: #ccc;
 }
 
+.header-img {
+  height: 30px;
+  width: 30px;
+}
 
+header h1 {
+  display: inline;
+}

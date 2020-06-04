@@ -14,7 +14,17 @@ function renderCells(cells, data, revisionsAutors) {
             
       s += '</table>';
 
-      tr += '<td class="key"><input type="checkbox" id="' + key + '" checked>' + key + '</td>' + '<td>' + s + '</td></tr>';
+      var checked = 'checked';
+      var hidden = '';
+      var val = localStorage.getItem(key)
+      if (val && val == 'false') {
+        checked = '';
+        hidden = 'hidden';
+      }
+        
+      
+
+      tr += '<td class="key"><input type="checkbox" id="' + key + '" ' + checked + '>' + key + '</td>' + '<td ' + hidden + '>' + s + '</td></tr>';
 
       tbody.innerHTML += tr;
   }
@@ -48,15 +58,20 @@ function renderWIInfo(imageinfo, revisionsAutors) {
 
 };
 
-function renderWITitle(title, url) {
+function renderWITitle(title, url, wi_type, icon_url) {
   var divurl = document.querySelector('#url');
     
+  var wi_icon = document.createElement('img');
+  wi_icon.src = icon_url;
+  wi_icon.className = "header-img";
+  divurl.appendChild(wi_icon);
   
-  var urltext = title;
+  var urltext = `${wi_type} ${title}`;
   var anchor = document.createElement('a');
   anchor.href = url;
   anchor.innerText = urltext;
   divurl.appendChild(anchor);
+
 };
 
 
@@ -88,12 +103,35 @@ function getImageInfoHandler(tfs_url, wi_id) {
     xmlHttp.send( null );
 }
 
+function fill_wi_title(tfs_url, wi_id, wi_type, wi_title) {
+  var urljson = tfs_url + '/_apis/wit/workitemtypes/' + wi_type;
+  var xmlHttp = new XMLHttpRequest();
+  xmlHttp.open( "GET", urljson, true ); // false for synchronous request
+
+  xmlHttp.onload = function (e) {
+    if (xmlHttp.readyState === 4) {
+      if (xmlHttp.status === 200) {
+        var obj = JSON.parse(xmlHttp.responseText);
+        var icon_url = obj['icon']['url'];
+        renderWITitle(wi_id + ':' + wi_title, tfs_url + '/_workitems/edit/' + wi_id, wi_type, icon_url);
+      } else {
+        console.error(xmlHttp.statusText);
+      }
+    }
+  };
+  xmlHttp.send( null );
+}
+
+
 function getImageInfoHandler1(tfs_url, wi_id, response) {
 
     var obj = JSON.parse(response);
     var f = obj.value[0].fields;
     var s = f['System.Title'];
-    
+    var wi_type = f['System.WorkItemType'];
+
+    fill_wi_title(tfs_url, wi_id, wi_type, s);
+
     var revisionsAutors = [];
     var fieldsset = [];
 
@@ -126,20 +164,15 @@ function getImageInfoHandler1(tfs_url, wi_id, response) {
       }
     }
     
-    
-
-    renderWITitle(wi_id + ':' + s, tfs_url + '/_workitems/edit/' + wi_id);
     renderWIInfo(fieldsset, revisionsAutors);
-    resizeWindow();
 
     for (let checkbox of document.querySelectorAll('input[type=checkbox]')) {
       checkbox.addEventListener( 'change', function() {
-        this.parentElement.nextElementSibling.hidden = !this.checked; 
+        this.parentElement.nextElementSibling.hidden = !this.checked;
+        localStorage.setItem(this.id, this.checked);
     });
     }
-
 }
-
 
 document.addEventListener("DOMContentLoaded", function () {
   var wi_id = window.location.hash.substring(1);

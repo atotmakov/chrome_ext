@@ -5,6 +5,7 @@
   "description" : "Get info for Azure DevOps workitems, including history data",
   "background" : { "scripts": ["background.js"], "persistent": true },
   "permissions" : [
+    "storage",
     "contextMenus",
     "http://*/*",
     "https://*/*"
