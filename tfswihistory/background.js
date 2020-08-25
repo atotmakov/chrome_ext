@@ -9,12 +9,12 @@ function getClickHandler() {
 
     var url = 'info.html?' + f + '#' + info.selectionText;
 
-    chrome.windows.create({ url: url });
+    chrome.windows.create({ url: url, type: "popup"});
   };
 };
 
 chrome.contextMenus.create({
-  "title" : "Get Azure DevOps Workitem Histrory", 
+  "title" : "Get Azure DevOps Workitem History", 
   "type" : "normal",
   "contexts" : ["selection"],
   "onclick" : getClickHandler()
