@@ -20,4 +20,4 @@ jobs:
         uses: TheDoctor0/zip-release@0.4.1
         with:
           # Filename for archive
-          filename: tfswihistory.zip
+          filename: 'tfswihistory.zip'
