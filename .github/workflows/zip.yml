@@ -6,9 +6,6 @@ on:
         description: 'Person to greet'
         required: true
         default: 'Alexey Totmakov'
-      home:
-        description: 'location'
-        required: false
 
 jobs:
   say_hello:
@@ -20,4 +17,4 @@ jobs:
         uses: papeloto/action-zip@v1
         with:
           # Files or directories to zip
-          files: tfswihistory
+          files: ./../tfswihistory
