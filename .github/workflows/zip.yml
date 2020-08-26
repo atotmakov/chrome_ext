@@ -21,3 +21,4 @@ jobs:
         with:
           # Filename for archive
           filename: 'tfswihistory.zip'
+          path: './tfswihistory'
