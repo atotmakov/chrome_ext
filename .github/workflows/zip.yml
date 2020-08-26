@@ -18,3 +18,4 @@ jobs:
         with:
           # Files or directories to zip
           files: ./
+          path: ${{ github.workspace }}/result.zip
