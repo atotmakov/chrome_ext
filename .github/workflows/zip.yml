@@ -1,4 +1,4 @@
-name: Chrome Addon Action
+name: zip
 on:
   workflow_dispatch:
     inputs:
