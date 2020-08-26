@@ -15,17 +15,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Chrome Addon Action
-      # You may pin to the exact commit or the version.
-      # uses: trmcnvn/chrome-addon@7fc5a5ad3ff597dc64d6a13de7dcaa8515328be7
-      uses: trmcnvn/chrome-addon@v2
-      with:
-        # ID of the extension that you are updating
-        extension: # optional
-        # Path to a .zip of your addon
-        zip: # optional
-        # Google OAuth2 client id
-        client-id: # optional
-        # Google OAuth2 client secret
-        client-secret: # optional
-        # Google OAuth2 refresh token
-        refresh-token: # optional
+        # You may pin to the exact commit or the version.
+        # uses: trmcnvn/chrome-addon@7fc5a5ad3ff597dc64d6a13de7dcaa8515328be7
+        uses: trmcnvn/chrome-addon@v2
+        with:
+          # ID of the extension that you are updating
+          extension: ociekhbkajgbjdenikmandhpjlekckee
+          # Path to a .zip of your addon
+          zip: build/tfswihistory.zip
