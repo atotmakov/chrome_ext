@@ -17,4 +17,4 @@ jobs:
         uses: papeloto/action-zip@v1
         with:
           # Files or directories to zip
-          files: ./../tfswihistory
+          files: ./*
