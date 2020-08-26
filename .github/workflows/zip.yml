@@ -14,11 +14,10 @@ jobs:
   say_hello:
     runs-on: ubuntu-latest
     steps:
-      - name: Zip Release
+      - name: Easy Zip Files
         # You may pin to the exact commit or the version.
-        # uses: TheDoctor0/zip-release@a1afcab9c664c9976ac398fa831eac67bed1eb0e
-        uses: TheDoctor0/zip-release@0.4.1
+        # uses: papeloto/action-zip@5f1c4aa587ea41db1110df6a99981dbe19cee310
+        uses: papeloto/action-zip@v1
         with:
-          # Filename for archive
-          filename: 'tfswihistory.zip'
-          path: './tfswihistory/*'
+          # Files or directories to zip
+          files: tfswihistory
