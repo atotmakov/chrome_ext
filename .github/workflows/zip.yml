@@ -11,11 +11,5 @@ jobs:
   say_hello:
     runs-on: ubuntu-latest
     steps:
-      - name: Easy Zip Files
-        # You may pin to the exact commit or the version.
-        # uses: papeloto/action-zip@5f1c4aa587ea41db1110df6a99981dbe19cee310
-        uses: papeloto/action-zip@v1
-        with:
-          # Files or directories to zip
-          files: ./
-          path: ${{ github.workspace }}/result.zip
+     - name: Zip on Ubuntu
+       uses: nguyenquyhy/zip-release@v0.3.0
