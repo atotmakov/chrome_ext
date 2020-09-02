@@ -8,8 +8,11 @@ on:
         default: 'Alexey Totmakov'
 
 jobs:
-  say_hello:
+  build:
     runs-on: ubuntu-latest
     steps:
-     - name: Zip on Ubuntu
-       uses: nguyenquyhy/zip-release@v0.3.0
+    - uses: actions/checkout@v1
+    - name: Zip Folder
+      run: zip -r release.zip .
+    - name: Release to Github
+      run: echo "Release"
