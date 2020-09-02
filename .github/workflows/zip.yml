@@ -12,10 +12,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v1
-    - name: Zip Folder
-      run: zip -r tfswihistory.zip ./tfswihistory -x ".git/*" ".github/*"
-    - name: Upload math result for job 1
+    - name: Checkout Folder
+#      run: zip -r tfswihistory.zip ./tfswihistory -x ".git/*" ".github/*"
+    - name: Upload result
       uses: actions/upload-artifact@v2
       with:
         name: tfswihistory
-        path: tfswihistory.zip
+        path: ./tfswihistory
