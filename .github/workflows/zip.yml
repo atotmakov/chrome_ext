@@ -13,9 +13,9 @@ jobs:
     steps:
     - uses: actions/checkout@v1
     - name: Zip Folder
-      run: zip -r release.zip . -x ".git/*" ".github/*"
+      run: zip -r tfswihistory.zip ./tfswihistory -x ".git/*" ".github/*"
     - name: Upload math result for job 1
       uses: actions/upload-artifact@v2
       with:
         name: release
-        path: release.zip
+        path: tfswihistory.zip
