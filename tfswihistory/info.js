@@ -1,37 +1,98 @@
+import * as dddif from './lib/diff.js';
+
+function html2text(html) {
+  html = html.toString();
+  html = html.replace(/<style([\s\S]*?)<\/style>/gi, '');
+  html = html.replace(/<script([\s\S]*?)<\/script>/gi, '');
+  html = html.replace(/<\/div>/ig, '\n');
+  html = html.replace(/<\/li>/ig, '\n');
+  html = html.replace(/<li>/ig, '  *  ');
+  html = html.replace(/<\/ul>/ig, '\n');
+  html = html.replace(/<\/p>/ig, '\n');
+  html = html.replace(/<br\s*[\/]?>/gi, "\n");
+  html = html.replace(/<[^>]+>/ig, '');
+  return html;
+}
+
+function getDiff(prev, curr) {
+  if (prev && curr) {
+    console.log('next call');
+    console.log(prev, curr);
+
+    var span = null;
+    var fragment = document.createDocumentFragment();
+    var diff = Diff.diffWords(html2text(prev), html2text(curr));
+    diff.forEach((part) => {
+      // green for additions, red for deletions
+      // grey for common parts
+      const color = part.added ? 'green' :
+        part.removed ? 'red' : 'black';
+      span = document.createElement('span');
+      span.style.color = color;
+      span.appendChild(document.createTextNode(part.value));
+      fragment.appendChild(span);
+    });
+    var sspan = document.createElement('span');
+    sspan.appendChild(fragment);
+    return sspan.outerHTML;
+  }
+  return curr;
+}
+
 function renderCells(cells, data, revisionsAutors) {
   var tbody = document.getElementById('tbody');
 
   for (const [key, value] of Object.entries(data)) {
-      var tr = "<tr class = 'rendered'>";
+    var prev = '';
+    var tr = "<tr class = 'rendered'>";
 
-      var s = '<table>'
+    var diff_id = `${key}_diff`;
+    var diff_on = localStorage.getItem(diff_id);
+    if (diff_on && diff_on == 'true') {
+      diff_on = true;
+    } else {
+      diff_on = false;
+    }
+    var checked = '';
+    if (diff_on) {
+      checked = 'checked';
+    }
 
-      var i = 0;
-      for( const v of value ){
-        var author = revisionsAutors[v.rev].author + ' ' + revisionsAutors[v.rev].dt;
-        s += '<tr = class="values"><td>' + v.val + '</td><td class = "rev">' + author + ' [rev:' + v.rev + ']</td></tr>';
+    var diffcheckbox = `<input type='checkbox' id='${diff_id}' ${checked}> Show as diff`
+
+    var s = `<table>`;
+
+    var i = 0;
+    for (const v of value) {
+      var author = revisionsAutors[v.rev].author + ' ' + revisionsAutors[v.rev].dt;
+
+      var val = v.val;
+      if (diff_on) {
+        var val = getDiff(prev, v.val);
       }
-            
-      s += '</table>';
 
-      var checked = 'checked';
-      var hidden = '';
-      var val = localStorage.getItem(key)
-      if (val && val == 'false') {
-        checked = '';
-        hidden = 'hidden';
-      }
-        
-      
+      s += '<tr = class="values"><td>' + val + '</td><td class = "rev">' + author + ' [rev:' + v.rev + ']</td></tr>';
+      prev = v.val;
+    }
 
-      tr += '<td class="key"><input type="checkbox" id="' + key + '" ' + checked + '>' + key + '</td>' + '<td ' + hidden + '>' + s + '</td></tr>';
+    s += '</table>';
 
-      tbody.innerHTML += tr;
+    var checked = 'checked';
+    var hidden = '';
+    var val = localStorage.getItem(key);
+    if (val && val == 'false') {
+      checked = '';
+      hidden = 'hidden';
+    }
+
+    tr += `<td class="key"><input type="checkbox" id="${key}" ${checked}>${key}<div ${hidden}><p>${diffcheckbox}</div></td><td ${hidden}>${s}</td></tr>`;
+    
+    tbody.innerHTML += tr;
   }
 };
 
 function resizeWindow() {
-  window.setTimeout(function() {
+  window.setTimeout(function () {
     chrome.tabs.getCurrent(function (tab) {
       var newHeight = Math.min(document.body.offsetHeight + 140, 700);
       chrome.windows.update(tab.windowId, {
@@ -60,12 +121,12 @@ function renderWIInfo(imageinfo, revisionsAutors) {
 
 function renderWITitle(title, url, wi_type, icon_url) {
   var divurl = document.querySelector('#url');
-    
+
   var wi_icon = document.createElement('img');
   wi_icon.src = icon_url;
   wi_icon.className = "header-img";
   divurl.appendChild(wi_icon);
-  
+
   var urltext = `${wi_type} ${title}`;
   var anchor = document.createElement('a');
   anchor.href = url;
@@ -76,37 +137,37 @@ function renderWITitle(title, url, wi_type, icon_url) {
 
 
 function formatDateTimeSkipOther(str) {
- var res = str; //str = "2019-10-17T08:56:08.573Z"
-  if (str[4]=='-' && str[7]=='-' && str[10]=='T' && str[13]==':' && str[16]==':' && str[19]=='.') {
+  var res = str; //str = "2019-10-17T08:56:08.573Z"
+  if (str[4] == '-' && str[7] == '-' && str[10] == 'T' && str[13] == ':' && str[16] == ':' && str[19] == '.') {
     var dt = new Date(str);
     const options = { weekday: 'long', year: 'numeric', month: 'long', day: '2-digit', hour: '2-digit', hour12: false, minute: '2-digit' };
-    res = dt.toLocaleDateString(undefined,options);
+    res = dt.toLocaleDateString(undefined, options);
   }
-  return  res;
+  return res;
 }
 
 
 function getImageInfoHandler(tfs_url, wi_id) {
-    var urljson = tfs_url + '/_apis/wit/workItems/' + wi_id + '/revisions?api-version=5.1'
-    var xmlHttp = new XMLHttpRequest();
-    xmlHttp.open( "GET", urljson, true ); // false for synchronous request
+  var urljson = tfs_url + '/_apis/wit/workItems/' + wi_id + '/revisions?api-version=5.1'
+  var xmlHttp = new XMLHttpRequest();
+  xmlHttp.open("GET", urljson, true); // false for synchronous request
 
-    xmlHttp.onload = function (e) {
-      if (xmlHttp.readyState === 4) {
-        if (xmlHttp.status === 200) {
-          getImageInfoHandler1(tfs_url, wi_id, xmlHttp.responseText);
-        } else {
-          console.error(xmlHttp.statusText);
-        }
+  xmlHttp.onload = function (e) {
+    if (xmlHttp.readyState === 4) {
+      if (xmlHttp.status === 200) {
+        getImageInfoHandler1(tfs_url, wi_id, xmlHttp.responseText);
+      } else {
+        console.error(xmlHttp.statusText);
       }
-    };
-    xmlHttp.send( null );
+    }
+  };
+  xmlHttp.send(null);
 }
 
 function fill_wi_title(tfs_url, wi_id, wi_type, wi_title) {
   var urljson = tfs_url + '/_apis/wit/workitemtypes/' + wi_type;
   var xmlHttp = new XMLHttpRequest();
-  xmlHttp.open( "GET", urljson, true ); // false for synchronous request
+  xmlHttp.open("GET", urljson, true); // false for synchronous request
 
   xmlHttp.onload = function (e) {
     if (xmlHttp.readyState === 4) {
@@ -119,59 +180,64 @@ function fill_wi_title(tfs_url, wi_id, wi_type, wi_title) {
       }
     }
   };
-  xmlHttp.send( null );
+  xmlHttp.send(null);
 }
 
 
 function getImageInfoHandler1(tfs_url, wi_id, response) {
 
-    var obj = JSON.parse(response);
-    var f = obj.value[0].fields;
-    var s = f['System.Title'];
-    var wi_type = f['System.WorkItemType'];
+  var obj = JSON.parse(response);
+  var f = obj.value[0].fields;
+  var s = f['System.Title'];
+  var wi_type = f['System.WorkItemType'];
 
-    fill_wi_title(tfs_url, wi_id, wi_type, s);
+  fill_wi_title(tfs_url, wi_id, wi_type, s);
 
-    var revisionsAutors = [];
-    var fieldsset = [];
+  var revisionsAutors = [];
+  var fieldsset = [];
 
-    var i = 0;
-    for (; i<obj.count; i++) {
-      var d = obj.value[i].fields;
-      for (const [key, value] of Object.entries(d)) {
-        var string_value = value;
-        if (typeof value !== 'string' && value['displayName']) {
-          string_value = value['displayName'];
+  var i = 0;
+  for (; i < obj.count; i++) {
+    var d = obj.value[i].fields;
+    for (const [key, value] of Object.entries(d)) {
+      var string_value = value;
+      if (typeof value !== 'string' && value['displayName']) {
+        string_value = value['displayName'];
+      }
+      string_value = formatDateTimeSkipOther(string_value);
+      if (!revisionsAutors[i]) {
+        revisionsAutors[i] = { author: '', dt: '' };
+      }
+      if (key == 'System.ChangedBy') {
+        revisionsAutors[i].author = string_value;
+      }
+      else if (key == 'System.ChangedDate') {
+        revisionsAutors[i].dt = string_value;
+      }
+      else {
+        if (fieldsset[key]) {
+          if (fieldsset[key][fieldsset[key].length - 1].val != string_value)
+            fieldsset[key].push({ rev: i, val: string_value });
         }
-        string_value = formatDateTimeSkipOther(string_value);
-        if (!revisionsAutors[i]) {
-          revisionsAutors[i] = {author: '', dt: ''};
-        }
-        if (key=='System.ChangedBy') {
-          revisionsAutors[i].author = string_value;
-        }
-        else if (key=='System.ChangedDate') {
-          revisionsAutors[i].dt = string_value;
-        }
-        else {
-         if (fieldsset[key]) {
-            if (fieldsset[key][fieldsset[key].length-1].val != string_value)
-              fieldsset[key].push({rev:i, val:string_value});
-          }
-          else 
-            fieldsset[key] = [{rev: i,val: string_value}]
-        } 
+        else
+          fieldsset[key] = [{ rev: i, val: string_value }]
       }
     }
-    
-    renderWIInfo(fieldsset, revisionsAutors);
+  }
 
-    for (let checkbox of document.querySelectorAll('input[type=checkbox]')) {
-      checkbox.addEventListener( 'change', function() {
+  renderWIInfo(fieldsset, revisionsAutors);
+
+  for (let checkbox of document.querySelectorAll('input[type=checkbox]')) {
+    checkbox.addEventListener('change', function () {
+      localStorage.setItem(this.id, this.checked);
+      if (this.parentElement.nextElementSibling) {
         this.parentElement.nextElementSibling.hidden = !this.checked;
-        localStorage.setItem(this.id, this.checked);
+        this.nextElementSibling.hidden = !this.checked
+      } else {
+        location.reload();
+      }
     });
-    }
+  }
 }
 
 document.addEventListener("DOMContentLoaded", function () {
