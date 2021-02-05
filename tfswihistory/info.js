@@ -64,7 +64,7 @@ function renderCells(cells, data, revisionsAutors) {
 
     var i = 0;
     for (const v of value) {
-      var author = revisionsAutors[v.rev].author + ' ' + revisionsAutors[v.rev].dt;
+      var author = revisionsAutors[v.rev - 1].author + ' ' + revisionsAutors[v.rev - 1].dt;
 
       var val = v.val;
       if (diff_on) {
@@ -137,8 +137,11 @@ function renderWITitle(title, url, wi_type, icon_url) {
 
 
 function formatDateTimeSkipOther(str) {
-  var res = str; //str = "2019-10-17T08:56:08.573Z"
-  if (str[4] == '-' && str[7] == '-' && str[10] == 'T' && str[13] == ':' && str[16] == ':' && str[19] == '.') {
+//str
+//2019-10-17T08:56:08.573Z
+//2020-11-29T21:00:00Z - not working
+  var res = str; 
+  if (str[4] == '-' && str[7] == '-' && str[10] == 'T' && str[13] == ':' && str[16] == ':' && ( str[19] == '.' || str[19] == 'Z')) {
     var dt = new Date(str);
     const options = { weekday: 'long', year: 'numeric', month: 'long', day: '2-digit', hour: '2-digit', hour12: false, minute: '2-digit' };
     res = dt.toLocaleDateString(undefined, options);
@@ -147,15 +150,37 @@ function formatDateTimeSkipOther(str) {
 }
 
 
-function getImageInfoHandler(tfs_url, wi_id) {
-  var urljson = tfs_url + '/_apis/wit/workItems/' + wi_id + '/revisions?api-version=5.1'
+function get_history(tfs_url, wi_id, page_num, revisionsAutors, fieldsset) {
+  var page_size = 100;
+  var urljson = tfs_url + '/_apis/wit/workItems/' + wi_id + `/revisions?$top=${page_size}&$skip=${page_size*page_num}&api-version=5.1`
   var xmlHttp = new XMLHttpRequest();
   xmlHttp.open("GET", urljson, true); // false for synchronous request
 
   xmlHttp.onload = function (e) {
     if (xmlHttp.readyState === 4) {
       if (xmlHttp.status === 200) {
-        getImageInfoHandler1(tfs_url, wi_id, xmlHttp.responseText);
+        get_history_handler(tfs_url, wi_id, page_num, revisionsAutors, fieldsset,xmlHttp.responseText);
+      } else {
+        console.error(xmlHttp.statusText);
+      }
+    }
+  };
+  xmlHttp.send(null);
+}
+
+function get_wi_title(tfs_url, wi_id)
+{
+  var urljson = tfs_url + '/_apis/wit/workitems/' + wi_id;
+  var xmlHttp = new XMLHttpRequest();
+  xmlHttp.open("GET", urljson, true); // false for synchronous request
+
+  xmlHttp.onload = function (e) {
+    if (xmlHttp.readyState === 4) {
+      if (xmlHttp.status === 200) {
+        var fields = JSON.parse(xmlHttp.responseText).fields;
+        var s = fields['System.Title'];
+        var wi_type = fields['System.WorkItemType'];
+        fill_wi_title(tfs_url, wi_id, wi_type, s);
       } else {
         console.error(xmlHttp.statusText);
       }
@@ -167,14 +192,14 @@ function getImageInfoHandler(tfs_url, wi_id) {
 function fill_wi_title(tfs_url, wi_id, wi_type, wi_title) {
   var urljson = tfs_url + '/_apis/wit/workitemtypes/' + wi_type;
   var xmlHttp = new XMLHttpRequest();
-  xmlHttp.open("GET", urljson, true); // false for synchronous request
+  xmlHttp.open("GET", urljson, true);
 
   xmlHttp.onload = function (e) {
     if (xmlHttp.readyState === 4) {
       if (xmlHttp.status === 200) {
         var obj = JSON.parse(xmlHttp.responseText);
         var icon_url = obj['icon']['url'];
-        renderWITitle(wi_id + ':' + wi_title, tfs_url + '/_workitems/edit/' + wi_id, wi_type, icon_url);
+        renderWITitle(`${wi_id} : ${wi_title}`, tfs_url + '/_workitems/edit/' + wi_id, wi_type, icon_url);
       } else {
         console.error(xmlHttp.statusText);
       }
@@ -183,22 +208,16 @@ function fill_wi_title(tfs_url, wi_id, wi_type, wi_title) {
   xmlHttp.send(null);
 }
 
-
-function getImageInfoHandler1(tfs_url, wi_id, response) {
-
-  var obj = JSON.parse(response);
-  var f = obj.value[0].fields;
-  var s = f['System.Title'];
-  var wi_type = f['System.WorkItemType'];
-
-  fill_wi_title(tfs_url, wi_id, wi_type, s);
-
+function extract_fields_and_authors(json_onject, fieldsset)
+{
   var revisionsAutors = [];
-  var fieldsset = [];
+
+  var obj = json_onject;
 
   var i = 0;
   for (; i < obj.count; i++) {
     var d = obj.value[i].fields;
+    var revision = obj.value[i].rev;
     for (const [key, value] of Object.entries(d)) {
       var string_value = value;
       if (typeof value !== 'string' && value['displayName']) {
@@ -217,26 +236,50 @@ function getImageInfoHandler1(tfs_url, wi_id, response) {
       else {
         if (fieldsset[key]) {
           if (fieldsset[key][fieldsset[key].length - 1].val != string_value)
-            fieldsset[key].push({ rev: i, val: string_value });
+            fieldsset[key].push({ rev: revision, val: string_value });
         }
         else
-          fieldsset[key] = [{ rev: i, val: string_value }]
+          fieldsset[key] = [{ rev: revision, val: string_value }]
       }
     }
   }
+  return [revisionsAutors, fieldsset];
+}
 
-  renderWIInfo(fieldsset, revisionsAutors);
+function get_history_handler(tfs_url, wi_id, page_num, revisionsAutors, fieldsset, response) {
 
-  for (let checkbox of document.querySelectorAll('input[type=checkbox]')) {
-    checkbox.addEventListener('change', function () {
-      localStorage.setItem(this.id, this.checked);
-      if (this.parentElement.nextElementSibling) {
-        this.parentElement.nextElementSibling.hidden = !this.checked;
-        this.nextElementSibling.hidden = !this.checked
-      } else {
-        location.reload();
-      }
-    });
+  var obj = JSON.parse(response);
+
+  if (fieldsset == null) {
+    fieldsset = [];
+  }
+  
+  const [autors, fields] = extract_fields_and_authors(obj, fieldsset);
+
+  if (revisionsAutors == null) {
+    revisionsAutors = autors;
+  }
+  else {
+    revisionsAutors = revisionsAutors.concat(autors);
+  }
+
+  if (obj.count == 0) { //all data loaded
+    renderWIInfo(fieldsset, revisionsAutors);
+
+    for (let checkbox of document.querySelectorAll('input[type=checkbox]')) {
+      checkbox.addEventListener('change', function () {
+        localStorage.setItem(this.id, this.checked);
+        if (this.parentElement.nextElementSibling) {
+          this.parentElement.nextElementSibling.hidden = !this.checked;
+          this.nextElementSibling.hidden = !this.checked
+        } else {
+          location.reload();
+        }
+      });
+    }
+  }
+  else {
+    get_history(tfs_url, wi_id, page_num + 1, revisionsAutors, fieldsset);
   }
 }
 
@@ -244,7 +287,8 @@ document.addEventListener("DOMContentLoaded", function () {
   var wi_id = window.location.hash.substring(1);
   var tfs_url = window.location.search.substring(1);
   if (tfs_url) {
-    getImageInfoHandler(tfs_url, wi_id);
+    get_wi_title(tfs_url, wi_id);
+    get_history(tfs_url, wi_id, 0, null, null);
   }
 });
 
