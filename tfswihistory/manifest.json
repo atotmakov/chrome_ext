@@ -4,7 +4,14 @@
   "version" : "0.0.0.6",
   "description" : "Get info for Azure DevOps workitems, including history data",
   "background" : { "scripts": ["background.js"], "persistent": true },
+  "content_scripts": [
+    {
+      "matches": ["https://*/*"],
+      "js": ["dt.js"]
+    }
+  ],
   "permissions" : [
+    "tabs",	
     "storage",
     "contextMenus",
     "http://*/*",
