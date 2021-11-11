@@ -37,10 +37,8 @@ function timeDiff(begin, end) {
         return formatTimePeriod(e - b);
     }
     
-
-var cm = setInterval(function() {
-    //comment-timestamp
-//comment-content
+function replace_timestamps()
+{
     var wi_ids = document.getElementsByClassName("work-item-form-id")
     if (wi_ids.length == 1)
     {
@@ -80,24 +78,14 @@ var cm = setInterval(function() {
             xmlHttp.send(null);
         }
     }
-}, 1000);
+    console.log("replace");
+}
 
 
 window.addEventListener('load', function () {
-    console.log('onload');    
-//    var x = document.getElementsByClassName("comment-timestamp");
-//    console.log(x);
-//    for (m of x) {
-//        console.log(m);
-//        m.innerHTML = 'fsd';
-//    }
-
-    //comments-section
-//    var comments = document.getElementsByClassName("flex-column flex-grow scroll-hidden")[0];
-
-//    console.log(comments);    
-
-//    const config = { attributes: true, childList: true, subtree: true };
-//    mutationObserver.observe(comments,config)
-
+    var page = chrome.extension.getBackgroundPage();
+    var change_time_setting = page.localStorage.getItem('change_time_setting') == 'true' ? true : false;
+    if (change_time_setting) {
+        setInterval(replace_timestamps, 1000);
+    }
 })
