@@ -3,7 +3,7 @@
   "author" : "atotmakov",
   "version" : "0.0.0.6",
   "description" : "Get info for Azure DevOps workitems, including history data",
-  "background" : { "scripts": ["background.js"], "persistent": true },
+  "background" : { "scripts": ["background.js"], "persistent": false },
   "content_scripts": [
     {
       "matches": ["https://*/*"],

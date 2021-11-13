@@ -6,8 +6,9 @@ function save_options() {
 
 function restore_options() {
     var page = chrome.extension.getBackgroundPage();
-    var change_time_setting = page.localStorage.getItem('change_time_setting') == 'true' ? true : false;
+    var change_time_setting = page.localStorage.getItem('change_time_setting') == 'false' ? false : true;
     document.getElementById('change_time_in_comment').checked = change_time_setting;
 }
 document.addEventListener('DOMContentLoaded', restore_options);
 document.getElementById('change_time_in_comment').addEventListener('click', save_options);
+  
