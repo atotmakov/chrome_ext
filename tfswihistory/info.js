@@ -16,9 +16,6 @@ function html2text(html) {
 
 function getDiff(prev, curr) {
   if (prev && curr) {
-    console.log('next call');
-    console.log(prev, curr);
-
     var span = null;
     var fragment = document.createDocumentFragment();
     var diff = Diff.diffWords(html2text(prev), html2text(curr));
@@ -86,7 +83,7 @@ function renderCells(cells, data, revisionsAutors) {
     }
 
     tr += `<td class="key"><input type="checkbox" id="${key}" ${checked}>${key}<div ${hidden}><p>${diffcheckbox}</div></td><td ${hidden}>${s}</td></tr>`;
-    
+
     tbody.innerHTML += tr;
   }
 };
@@ -137,11 +134,11 @@ function renderWITitle(title, url, wi_type, icon_url) {
 
 
 function formatDateTimeSkipOther(str) {
-//str
-//2019-10-17T08:56:08.573Z
-//2020-11-29T21:00:00Z - not working
-  var res = str; 
-  if (str[4] == '-' && str[7] == '-' && str[10] == 'T' && str[13] == ':' && str[16] == ':' && ( str[19] == '.' || str[19] == 'Z')) {
+  //str
+  //2019-10-17T08:56:08.573Z
+  //2020-11-29T21:00:00Z - not working
+  var res = str;
+  if (str[4] == '-' && str[7] == '-' && str[10] == 'T' && str[13] == ':' && str[16] == ':' && (str[19] == '.' || str[19] == 'Z')) {
     var dt = new Date(str);
     const options = { weekday: 'long', year: 'numeric', month: 'long', day: '2-digit', hour: '2-digit', hour12: false, minute: '2-digit' };
     res = dt.toLocaleDateString(undefined, options);
@@ -152,14 +149,14 @@ function formatDateTimeSkipOther(str) {
 
 function get_history(tfs_url, wi_id, page_num, revisionsAutors, fieldsset) {
   var page_size = 100;
-  var urljson = tfs_url + '/_apis/wit/workItems/' + wi_id + `/revisions?$top=${page_size}&$skip=${page_size*page_num}&api-version=5.1`
+  var urljson = tfs_url + '/_apis/wit/workItems/' + wi_id + `/revisions?$top=${page_size}&$skip=${page_size * page_num}&api-version=5.1`
   var xmlHttp = new XMLHttpRequest();
   xmlHttp.open("GET", urljson, true); // false for synchronous request
 
   xmlHttp.onload = function (e) {
     if (xmlHttp.readyState === 4) {
       if (xmlHttp.status === 200) {
-        get_history_handler(tfs_url, wi_id, page_num, revisionsAutors, fieldsset,xmlHttp.responseText);
+        get_history_handler(tfs_url, wi_id, page_num, revisionsAutors, fieldsset, xmlHttp.responseText);
       } else {
         console.error(xmlHttp.statusText);
       }
@@ -168,8 +165,7 @@ function get_history(tfs_url, wi_id, page_num, revisionsAutors, fieldsset) {
   xmlHttp.send(null);
 }
 
-function get_wi_title(tfs_url, wi_id)
-{
+function get_wi_title(tfs_url, wi_id) {
   var urljson = tfs_url + '/_apis/wit/workitems/' + wi_id;
   var xmlHttp = new XMLHttpRequest();
   xmlHttp.open("GET", urljson, true); // false for synchronous request
@@ -208,8 +204,7 @@ function fill_wi_title(tfs_url, wi_id, wi_type, wi_title) {
   xmlHttp.send(null);
 }
 
-function extract_fields_and_authors(json_onject, fieldsset)
-{
+function extract_fields_and_authors(json_onject, fieldsset) {
   var revisionsAutors = [];
 
   var obj = json_onject;
@@ -253,7 +248,7 @@ function get_history_handler(tfs_url, wi_id, page_num, revisionsAutors, fieldsse
   if (fieldsset == null) {
     fieldsset = [];
   }
-  
+
   const [autors, fields] = extract_fields_and_authors(obj, fieldsset);
 
   if (revisionsAutors == null) {

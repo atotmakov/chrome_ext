@@ -76,7 +76,6 @@ function replace_timestamps() {
             xmlHttp.send(null);
         }
     }
-    console.log("replace");
 }
 
 window.addEventListener('load', function () {
