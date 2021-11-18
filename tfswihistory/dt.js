@@ -43,8 +43,11 @@ function replace_timestamps() {
         var wi_id = wi_ids[0].children[0].innerText;
         var comment = document.getElementsByClassName("wit-comment-viewer");
 
+        url = window.location.href;
+        url = url.substring(0, url.indexOf('_workitems'));
+
         if (Array.from(comment).some(c => "done" != c.getAttribute("operated"))) {
-            var urljson = `https://hqrndtfs.avp.ru/tfs/DefaultCollection/Monorepo/_apis/wit/workitems/${wi_id}/comments`
+            var urljson = url + `_apis/wit/workitems/${wi_id}/comments`
             var xmlHttp = new XMLHttpRequest();
             xmlHttp.open("GET", urljson, true); // false for synchronous request
             xmlHttp.onload = function () {
