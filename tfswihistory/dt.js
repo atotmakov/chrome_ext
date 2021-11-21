@@ -79,12 +79,18 @@ function replace_timestamps() {
             xmlHttp.send(null);
         }
     }
+    console.log("replaced"); 
 }
 
 window.addEventListener('load', function () {
-    chrome.runtime.sendMessage({ method: 'getoption', option_name: 'change_time_setting' }, function (response) {
-        if (response.option_value != 'false') {
-            setInterval(replace_timestamps, 1000);
-        }
-    });
-})
+    const v = { method: 'getoption', option_name: 'change_time_setting' };
+    chrome.runtime.sendMessage(v, (response) => { console.log(response); });
+});
+
+chrome.runtime.onMessage.addListener(function (options) { 
+    console.log("on sett:", options.change_time_setting); 
+    if (options.change_time_setting != false) {
+        setInterval(replace_timestamps, 1000);
+    }
+});
+

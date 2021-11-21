@@ -2,11 +2,8 @@ function getClickHandler() {
   return function (info, tab) {
 
     var urll = info.pageUrl;
-
     var pn = urll.indexOf('/_');
-
     var f = urll.substring(0, pn);
-
     var url = 'info.html?' + f + '#' + info.selectionText;
 
     chrome.windows.create({ url: url, type: "popup" });
@@ -14,17 +11,22 @@ function getClickHandler() {
 };
 
 chrome.contextMenus.create({
+  "id": "sfweropiwerfoisjfiowepufwefiwe",
   "title": "Get Azure DevOps Workitem History",
   "type": "normal",
-  "contexts": ["selection"],
-  "onclick": getClickHandler()
+  "contexts": ["selection"]
 });
 
-chrome.runtime.onMessage.addListener(
-  function (request, sender, sendResponse) {
-    if (request.method === 'getoption') {
-      var change_time_setting = localStorage.getItem(request.option_name);
-      sendResponse({ option_value: change_time_setting });
-    }
+chrome.contextMenus.onClicked.addListener(getClickHandler());
+
+chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
+  //console.log(request, sender, sendResponse);  
+  let key = request.option_name;
+  if (request.method === 'getoption') {
+    chrome.storage.local.get([key], function (result) {
+      console.log(result);
+      chrome.tabs.sendMessage(sender.tab.id, result);
+    });
+    sendResponse("Recieved");
   }
-);
+});
