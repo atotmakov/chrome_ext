@@ -1,8 +1,3 @@
-//window.onload = function() {
-//    document.write('Hello world');
-//}
-
-
 function formatDateTime(str) {
     //str
     //2019-10-17T08:56:08.573Z
@@ -82,14 +77,35 @@ function replace_timestamps() {
     console.log("replaced"); 
 }
 
+function get_workitem_fromDOM() {
+    
+    // The first element that matches (or null if none do):
+    //var element = document.querySelector('[aria-label="ID Field"]');
+    // A list of matching elements (empty if none do):
+    let text = '';
+    let list = document.querySelectorAll('[aria-label="ID Field"]');
+    list.forEach( (val) => { 
+        console.log(val, val.innerHTML);
+        text = text + val.innerHTML; 
+    });
+    
+    //var text = '';
+    
+
+    return { id: 12345, url: text };
+}
+
 window.addEventListener('load', function () {
     const v = { method: 'getoption', option_name: 'change_time_setting' };
     chrome.runtime.sendMessage(v, (response) => { console.log(response); });
 });
 
-chrome.runtime.onMessage.addListener(function (options) { 
-    console.log("on sett:", options.change_time_setting); 
-    if (options.change_time_setting != false) {
+chrome.runtime.onMessage.addListener( (request, sender, sendResponse) => { 
+    console.log(request);
+    if (request.get_workitem_fromDOM) {
+        sendResponse( get_workitem_fromDOM());
+    }
+    if (request.change_time_setting != false) {
         setInterval(replace_timestamps, 1000);
     }
 });
