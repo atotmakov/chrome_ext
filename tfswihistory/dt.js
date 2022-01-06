@@ -74,7 +74,6 @@ function replace_timestamps() {
             xmlHttp.send(null);
         }
     }
-    console.log("replaced"); 
 }
 
 function get_workitem_fromDOM() {
@@ -85,14 +84,13 @@ function get_workitem_fromDOM() {
     let text = '';
     let list = document.querySelectorAll('[aria-label="ID Field"]');
     list.forEach( (val) => { 
-        console.log(val, val.innerHTML);
         text = text + val.innerHTML; 
     });
     
     //var text = '';
     
 
-    return { id: 12345, url: text };
+    return { id: text, url: window.location.href };
 }
 
 window.addEventListener('load', function () {
@@ -101,7 +99,6 @@ window.addEventListener('load', function () {
 });
 
 chrome.runtime.onMessage.addListener( (request, sender, sendResponse) => { 
-    console.log(request);
     if (request.get_workitem_fromDOM) {
         sendResponse( get_workitem_fromDOM());
     }
