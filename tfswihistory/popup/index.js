@@ -8,6 +8,8 @@ chrome.runtime.onMessage.addListener( (request, sender, sendResponse) => {
     a.appendChild(linkText);
     a.title = `workitem: ${request.id}`;
     a.href = request.url;
-    const wi_placeholder = document.getElementById("workitem");
+    a.target = '_blank';
+    a.rel = 'noopener noreferrer';
+    var wi_placeholder = document.getElementById("workitem");
     wi_placeholder.appendChild(a);
 });

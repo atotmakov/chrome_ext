@@ -1,4 +1,5 @@
 import * as dddif from './lib/diff.js';
+import {formatDateTime, timeDiff} from './time.js';
 
 function html2text(html) {
   html = html.toString();
@@ -36,14 +37,14 @@ function getDiff(prev, curr) {
   return curr;
 }
 
-function renderCells(cells, data, revisionsAutors) {
+function renderCells(cells, fieldsChangesByRevisions, revisionsAutors) {
   var tbody = document.getElementById('tbody');
 
-  for (const [key, value] of Object.entries(data)) {
-    var prev = '';
+  for (const [field, field_values] of Object.entries(fieldsChangesByRevisions)) {
+    
     var tr = "<tr class = 'rendered'>";
 
-    var diff_id = `${key}_diff`;
+    var diff_id = `${field}_diff`;
     var diff_on = localStorage.getItem(diff_id);
     if (diff_on && diff_on == 'true') {
       diff_on = true;
@@ -59,16 +60,30 @@ function renderCells(cells, data, revisionsAutors) {
 
     var s = `<table>`;
 
-    var i = 0;
-    for (const v of value) {
-      var author = revisionsAutors[v.rev - 1].author + ' ' + revisionsAutors[v.rev - 1].dt;
+    var prev = '';
+    for (var cur_field_val_ind = 0, next_field_val_ind = 1; cur_field_val_ind < field_values.length; cur_field_val_ind++, next_field_val_ind ++) {
+    //for (const v of field_values) {
+      var v = field_values[cur_field_val_ind];
+      
+      var field_changed_date = revisionsAutors[v.rev].dt;
+      var field_changed_author = revisionsAutors[v.rev].author;
+
+      var next_value_time = null;
+      if (cur_field_val_ind + 1 < field_values.length) {
+        var next_field_value_rev = field_values[cur_field_val_ind + 1].rev;
+        next_value_time = revisionsAutors[next_field_value_rev].dt
+      }
+      var elapsed_time = timeDiff(field_changed_date, next_value_time);
+
+
+      var author = field_changed_author + '; ' + formatDateTime(field_changed_date) + '; ' + elapsed_time + '; [rev:' + v.rev + ']';
 
       var val = v.val;
       if (diff_on) {
         var val = getDiff(prev, v.val);
       }
 
-      s += '<tr = class="values"><td>' + val + '</td><td class = "rev">' + author + ' [rev:' + v.rev + ']</td></tr>';
+      s += '<tr = class="values"><td>' + val + '</td><td class = "rev">' + author + '</td></tr>';
       prev = v.val;
     }
 
@@ -76,13 +91,13 @@ function renderCells(cells, data, revisionsAutors) {
 
     var checked = 'checked';
     var hidden = '';
-    var val = localStorage.getItem(key);
+    var val = localStorage.getItem(field);
     if (val && val == 'false') {
       checked = '';
       hidden = 'hidden';
     }
 
-    tr += `<td class="key"><input type="checkbox" id="${key}" ${checked}>${key}<div ${hidden}><p>${diffcheckbox}</div></td><td ${hidden}>${s}</td></tr>`;
+    tr += `<td class="key"><input type="checkbox" id="${field}" ${checked}>${field}<div ${hidden}><p>${diffcheckbox}</div></td><td ${hidden}>${s}</td></tr>`;
 
     tbody.innerHTML += tr;
   }
@@ -131,21 +146,6 @@ function renderWITitle(title, url, wi_type, icon_url) {
   divurl.appendChild(anchor);
 
 };
-
-
-function formatDateTimeSkipOther(str) {
-  //str
-  //2019-10-17T08:56:08.573Z
-  //2020-11-29T21:00:00Z - not working
-  var res = str;
-  if (str[4] == '-' && str[7] == '-' && str[10] == 'T' && str[13] == ':' && str[16] == ':' && (str[19] == '.' || str[19] == 'Z')) {
-    var dt = new Date(str);
-    const options = { weekday: 'long', year: 'numeric', month: 'long', day: '2-digit', hour: '2-digit', hour12: false, minute: '2-digit' };
-    res = dt.toLocaleDateString(undefined, options);
-  }
-  return res;
-}
-
 
 function get_history(tfs_url, wi_id, page_num, revisionsAutors, fieldsset) {
   var page_size = 100;
@@ -206,35 +206,42 @@ function fill_wi_title(tfs_url, wi_id, wi_type, wi_title) {
 
 function extract_fields_and_authors(json_onject, fieldsset) {
   var revisionsAutors = [];
+  revisionsAutors[0] = 'skip zero index to align with tfs revisions, which started from 1';
 
   var obj = json_onject;
 
-  var i = 0;
-  for (; i < obj.count; i++) {
-    var d = obj.value[i].fields;
+  var all_possible_fileds_names = new Set();
+  for (var i = 0; i < obj.count; i++) { //iterate through revisions
+    var fields = obj.value[i].fields;
     var revision = obj.value[i].rev;
-    for (const [key, value] of Object.entries(d)) {
+    revisionsAutors[i+1] = { author: fields['System.ChangedBy']['displayName'], dt: fields['System.ChangedDate'] };
+
+    //for each revision azure returns not all fields
+    //in case when field became undefinded, azure do not returns it in fields revision list
+    //so we should iterate through all fields wich we met in the previous revisions
+    for (const [name, value] of Object.entries(fields)) {
+      all_possible_fileds_names.add(name);
+    }
+
+    for (var name of all_possible_fileds_names.values())
+    {
+      var value = fields[name];
       var string_value = value;
-      if (typeof value !== 'string' && value['displayName']) {
-        string_value = value['displayName'];
-      }
-      string_value = formatDateTimeSkipOther(string_value);
-      if (!revisionsAutors[i]) {
-        revisionsAutors[i] = { author: '', dt: '' };
-      }
-      if (key == 'System.ChangedBy') {
-        revisionsAutors[i].author = string_value;
-      }
-      else if (key == 'System.ChangedDate') {
-        revisionsAutors[i].dt = string_value;
+      if(value) {
+        if (typeof value !== 'string' && value['displayName']) {
+          string_value = value['displayName'];
+        }
       }
       else {
-        if (fieldsset[key]) {
-          if (fieldsset[key][fieldsset[key].length - 1].val != string_value)
-            fieldsset[key].push({ rev: revision, val: string_value });
-        }
-        else
-          fieldsset[key] = [{ rev: revision, val: string_value }]
+        string_value = '__undefined__';
+      }
+  
+      if (fieldsset[name]) {
+        if (fieldsset[name][fieldsset[name].length - 1].val != string_value)
+          fieldsset[name].push({ rev: revision, val: string_value });
+      }
+      else {
+        fieldsset[name] = [{ rev: revision, val: string_value }]
       }
     }
   }
@@ -276,6 +283,10 @@ function get_history_handler(tfs_url, wi_id, page_num, revisionsAutors, fieldsse
   else {
     get_history(tfs_url, wi_id, page_num + 1, revisionsAutors, fieldsset);
   }
+}
+
+function render_pivot() {
+  var placeholder = document.getElementById('pivot');
 }
 
 document.addEventListener("DOMContentLoaded", function () {
