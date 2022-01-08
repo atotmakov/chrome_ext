@@ -23,6 +23,16 @@ tr.values:nth-child(even) {
   background: #ccc;
 }
 
+td.values:nth-child(1) { 
+  width: 100%; 
+}
+
+td.date, td.time { 
+  white-space:nowrap; 
+  color: brown;
+}
+
+
 .header-img {
   height: 30px;
   width: 30px;

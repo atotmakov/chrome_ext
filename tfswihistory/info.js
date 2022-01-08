@@ -37,6 +37,134 @@ function getDiff(prev, curr) {
   return curr;
 }
 
+function addCheckbox(parent, id, text, checked)
+{
+  var checkbox = document.createElement('input');
+  checkbox.type = "checkbox";
+  checkbox.id = id;
+  checkbox.checked = checked;
+  var label = document.createElement('label')
+  label.htmlFor = id;
+  label.appendChild(document.createTextNode(text));
+  parent.appendChild(checkbox);
+  parent.appendChild(label);
+  return checkbox;
+}
+
+function renderCellsEx(fieldsChangesByRevisions, revisionsAutors) {
+  var tbl = document.createElement('table');
+  for (const [field, field_values] of Object.entries(fieldsChangesByRevisions)) {
+    var tr = tbl.insertRow();
+    tr.className = 'rendered';
+
+    var field_cell = tr.insertCell();
+    var field_checked = localStorage.getItem(field);
+    field_checked = !(field_checked && field_checked == 'false');
+    var val_cb = addCheckbox(field_cell, field, field, field_checked);
+   
+    var value_div = document.createElement('div');
+    value_div.hidden = !field_checked;
+    field_cell.appendChild(value_div);
+    
+    var diff_checked = localStorage.getItem(`${field}_diff`);
+    diff_checked = !(diff_checked && diff_checked == 'false');
+    addCheckbox(value_div, `${field}_diff`, 'Show as diff', diff_checked);
+
+    var value_cell = tr.insertCell();
+    var value_div = document.createElement('div');
+    value_div.className = 'values';
+    value_cell.appendChild(value_div);
+    var value_tbl = document.createElement('table');
+    value_div.appendChild(value_tbl);
+
+    for (var cur_field_val_ind = 0, next_field_val_ind = 1; cur_field_val_ind < field_values.length; cur_field_val_ind++, next_field_val_ind ++) {
+      var v = field_values[cur_field_val_ind];
+      
+      var field_changed_date = revisionsAutors[v.rev].dt;
+      var field_changed_author = revisionsAutors[v.rev].author;
+
+      var next_value_time = null;
+      if (cur_field_val_ind + 1 < field_values.length) {
+        var next_field_value_rev = field_values[cur_field_val_ind + 1].rev;
+        next_value_time = revisionsAutors[next_field_value_rev].dt
+      }
+      var elapsed_time = timeDiff(field_changed_date, next_value_time);
+
+      var value_tr = value_tbl.insertRow();
+            
+      var val_cell = value_tr.insertCell();
+      val_cell.className = 'values';
+      val_cell.appendChild(document.createTextNode(v.val));
+
+      var author_cell = value_tr.insertCell();
+      author_cell.className = 'author';
+      author_cell.appendChild(document.createTextNode(revisionsAutors[v.rev].author));
+
+      var date_cell = value_tr.insertCell();
+      date_cell.className = 'date';
+      date_cell.appendChild(document.createTextNode(formatDateTime(revisionsAutors[v.rev].dt)));
+
+      var elapsed_cell = value_tr.insertCell();
+      elapsed_cell.className = 'time';
+      elapsed_cell.appendChild(document.createTextNode(elapsed_time));
+
+      var rev_cell = value_tr.insertCell();
+      rev_cell.className = 'revision';
+      rev_cell.appendChild(document.createTextNode(v.rev));
+    }
+
+
+/*    var value_cell = tr.insertCell();
+    for (const [key, value] of Object.entries(field_values)) {
+      var value_div = document.createElement('div');
+      value_div.className = 'values';
+      value_cell.appendChild(value_div);
+      value_div.appendChild(document.createTextNode(value.val));
+    }
+
+    var author_cell = tr.insertCell();
+    for (const [key, value] of Object.entries(field_values)) {
+      var div = document.createElement('div');
+      div.className = 'values';
+      author_cell.appendChild(div);
+      div.appendChild(document.createTextNode(revisionsAutors[value.rev].author));
+    }
+
+    var date_cell = tr.insertCell();
+    for (const [key, value] of Object.entries(field_values)) {
+      var div = document.createElement('div');
+      div.className = 'values';
+      date_cell.appendChild(div);
+      div.appendChild(document.createTextNode(formatDateTime(revisionsAutors[value.rev].dt)));
+    }
+
+    var elapsed_cell = tr.insertCell();
+    for (var cur_field_val_ind = 0, next_field_val_ind = 1; cur_field_val_ind < field_values.length; cur_field_val_ind++, next_field_val_ind ++) {
+        var v = field_values[cur_field_val_ind];
+        
+        var field_changed_date = revisionsAutors[v.rev].dt;
+        var field_changed_author = revisionsAutors[v.rev].author;
+  
+        var next_value_time = null;
+        if (cur_field_val_ind + 1 < field_values.length) {
+          var next_field_value_rev = field_values[cur_field_val_ind + 1].rev;
+          next_value_time = revisionsAutors[next_field_value_rev].dt
+        }
+        var elapsed_time = timeDiff(field_changed_date, next_value_time);
+
+        var div = document.createElement('div');
+        div.className = 'values';
+        elapsed_cell.appendChild(div);
+        div.appendChild(document.createTextNode(elapsed_time));
+      }
+  */
+
+  }
+  
+  
+  document.getElementById('fields_table').appendChild(tbl);
+}
+
 function renderCells(cells, fieldsChangesByRevisions, revisionsAutors) {
   var tbody = document.getElementById('tbody');
 
@@ -128,6 +256,7 @@ function renderWIInfo(imageinfo, revisionsAutors) {
 
   var datacells = divinfo.querySelectorAll('td');
   renderCells(datacells, imageinfo, revisionsAutors);
+  renderCellsEx(imageinfo, revisionsAutors);
 
 };
 
