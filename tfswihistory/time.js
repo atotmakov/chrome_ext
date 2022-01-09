@@ -18,10 +18,10 @@ function formatTimePeriod(str) {
     var minutes = Math.floor(sec_num - days * 24 * 60 - hours * 60);
 
     var res = ""
-    if (days > 0) { res = `${days} days`; }
-    if (hours > 0) { res = `${res} ${hours} hours`; }
-    if (minutes > 0 && days < 1) { res = `${res} ${minutes} mins`; }
-    if (days == 0 && hours == 0 && minutes == 0) { res = "0 secs"; }
+    if (days > 0) { res = `${days} d`; }
+    if (hours > 0) { res = `${res} ${hours} h`; }
+    if (minutes > 0 && days < 1) { res = `${res} ${minutes} m`; }
+    if (days == 0 && hours == 0 && minutes == 0) { res = "0 s"; }
     return res;
 }
 

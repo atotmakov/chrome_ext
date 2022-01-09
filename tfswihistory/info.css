@@ -1,12 +1,9 @@
 table {
   width: 100%;
-  margin: 15px 0;
+  border-collapse: collapse;
 }
 td, th {
   padding: 4px;
-}
-td.rev {
-  text-align: right;
 }
 td.key {
   font-weight: bold;
@@ -17,19 +14,25 @@ tr.rendered {
   vertical-align: top;
 }
 tr.rendered:nth-child(odd) {
-  background: #eee;
+  background: rgb(240, 240, 240);
 }
-tr.values:nth-child(even) {
-  background: #ccc;
+tr.values:nth-child(even), tr.author:nth-child(even) {
+  background: rgb(220, 220, 220);
 }
 
 td.values:nth-child(1) { 
   width: 100%; 
 }
 
-td.date, td.time { 
+td.deleted_values {
+  width: 100%; 
+  text-decoration: line-through;
+}
+
+
+td.author, td.date, td.time, td.revision { 
   white-space:nowrap; 
-  color: brown;
+  border: 1px solid #999;
 }
 
 
