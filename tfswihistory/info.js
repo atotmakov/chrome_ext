@@ -37,6 +37,56 @@ function getDiff(prev, curr) {
   return curr;
 }
 
+function renderFieldHistory(fieldsChangesByRevisions, revisionsAutors) {
+  var field_selector_input = document.createElement('input');
+  field_selector_input.id = 'field_selector_input';
+  field_selector_input.type = 'text';
+  field_selector_input.setAttribute('list', 'field_selector') ;
+
+  var field_selector = document.createElement('datalist');
+  field_selector.id = 'field_selector';
+
+  for (const [field, field_values] of Object.entries(fieldsChangesByRevisions)) {
+    var option = document.createElement('option');
+    option.value = field;
+    field_selector.appendChild(option);
+  }
+
+
+  var ss = '';
+  var selected = localStorage.getItem(field_selector_input.id);
+  if (selected) {
+    field_selector_input.value = selected;
+    var s = new Map();
+    //for (const value of fieldsChangesByRevisions[selected]) {
+    var field_values = fieldsChangesByRevisions[selected];
+    for (var cur_field_val_ind = 0; cur_field_val_ind < field_values.length; cur_field_val_ind++) {
+      var v = field_values[cur_field_val_ind];
+      var elapsed_time = getTimeDiff(cur_field_val_ind, field_values, revisionsAutors);
+      if (s.has(v.val)) {
+        s.set(v.val, s.get(v.val) + ' |  ' +elapsed_time + ' ');
+      }
+      else {
+        s.set( v.val, elapsed_time );
+      }
+    }
+    var jo = {}  
+    s.forEach((value, key) => {  
+    jo[key] = value  
+    });
+    ss = JSON.stringify(jo);
+  }
+  
+  var placeholder = document.getElementById('pivot');
+  placeholder.appendChild(field_selector_input);
+  placeholder.append(document.createTextNode(ss)); 
+  placeholder.appendChild(field_selector);
+
+  field_selector_input.addEventListener('change', function () {
+    localStorage.setItem(this.id, this.value);
+  });
+}
+
 function addCheckbox(parent, id, text, checked)
 {
   var checkbox = document.createElement('input');
@@ -49,6 +99,20 @@ function addCheckbox(parent, id, text, checked)
   parent.appendChild(checkbox);
   parent.appendChild(label);
   return checkbox;
+}
+
+function getTimeDiff(index, array_values, array_dates) {
+  var cur_field_val_ind = index;
+  var field_values = array_values;
+  var revisionsAutors = array_dates;
+  var field_changed_date = revisionsAutors[field_values[cur_field_val_ind].rev].dt;
+
+  var next_value_time = null;
+  if (cur_field_val_ind + 1 < field_values.length) {
+    var next_field_value_rev = field_values[cur_field_val_ind + 1].rev;
+    next_value_time = revisionsAutors[next_field_value_rev].dt
+  }
+  return timeDiff(field_changed_date, next_value_time);
 }
 
 function renderCellsEx(fieldsChangesByRevisions, revisionsAutors) {
@@ -80,18 +144,13 @@ function renderCellsEx(fieldsChangesByRevisions, revisionsAutors) {
     value_div.appendChild(value_tbl);
 
 
-    for (var cur_field_val_ind = 0, next_field_val_ind = 1; cur_field_val_ind < field_values.length; cur_field_val_ind++, next_field_val_ind ++) {
+    for (var cur_field_val_ind = 0; cur_field_val_ind < field_values.length; cur_field_val_ind++) {
       var v = field_values[cur_field_val_ind];
       
       var field_changed_date = revisionsAutors[v.rev].dt;
       var field_changed_author = revisionsAutors[v.rev].author;
 
-      var next_value_time = null;
-      if (cur_field_val_ind + 1 < field_values.length) {
-        var next_field_value_rev = field_values[cur_field_val_ind + 1].rev;
-        next_value_time = revisionsAutors[next_field_value_rev].dt
-      }
-      var elapsed_time = timeDiff(field_changed_date, next_value_time);
+      var elapsed_time = getTimeDiff(cur_field_val_ind, field_values, revisionsAutors);
 
       var value_tr = value_tbl.insertRow();
       value_tr.className = 'values';
@@ -228,6 +287,7 @@ function renderWIInfo(imageinfo, revisionsAutors) {
   var datacells = divinfo.querySelectorAll('td');
 //  renderCells(datacells, imageinfo, revisionsAutors);
   renderCellsEx(imageinfo, revisionsAutors);
+  //renderFieldHistory(imageinfo, revisionsAutors);
 
 };
 
@@ -383,10 +443,6 @@ function get_history_handler(tfs_url, wi_id, page_num, revisionsAutors, fieldsse
   else {
     get_history(tfs_url, wi_id, page_num + 1, revisionsAutors, fieldsset);
   }
-}
-
-function render_pivot() {
-  var placeholder = document.getElementById('pivot');
 }
 
 document.addEventListener("DOMContentLoaded", function () {
