@@ -3,7 +3,7 @@ function formatDateTime(str) {
     //2019-10-17T08:56:08.573Z
     //2020-11-29T21:00:00Z - not working
     var res = str;
-    if (str[4] == '-' && str[7] == '-' && str[10] == 'T' && str[13] == ':' && str[16] == ':' && (str[19] == '.' || str[19] == 'Z')) {
+    if (str && typeof(str) == 'string' && str.length > 19 && str[4] == '-' && str[7] == '-' && str[10] == 'T' && str[13] == ':' && str[16] == ':' && (str[19] == '.' || str[19] == 'Z')) {
         var dt = new Date(str);
         const options = { year: 'numeric', month: 'short', day: '2-digit', hour: '2-digit', hour12: false, minute: '2-digit' };
         res = dt.toLocaleDateString(undefined, options);
@@ -36,4 +36,4 @@ function timeDiff(begin, end) {
     return formatTimePeriod(e - b);
 }
 
-export { formatDateTime, timeDiff };
+//export { formatDateTime, timeDiff};

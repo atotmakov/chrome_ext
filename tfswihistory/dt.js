@@ -1,4 +1,4 @@
-import {formatDateTime, timeDiff} from './time.js';
+//import {formatDateTime, timeDiff} from './time.js';
 
 function replace_timestamps() {
     var wi_ids = document.getElementsByClassName("work-item-form-id")

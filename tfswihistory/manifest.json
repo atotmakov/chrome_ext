@@ -8,7 +8,13 @@
   "content_scripts": [
     {
       "matches": ["https://*/*"],
-      "js": ["dt.js"]
+      "js": ["dt.js", "time.js"]
+    }
+  ],
+  "web_accessible_resources": [
+    {
+      "resources": [ "dt.js", "time.js" ],
+      "matches": [ "https://*/*" ]
     }
   ],
   "permissions" : [

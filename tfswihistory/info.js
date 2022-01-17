@@ -1,5 +1,4 @@
-import * as dddif from './lib/diff.js';
-import {formatDateTime, timeDiff} from './time.js';
+//import * as dddif from './lib/diff.js';
 
 function html2text(html) {
   html = html.toString();
