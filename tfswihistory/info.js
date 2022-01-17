@@ -136,6 +136,7 @@ function renderCellsEx(fieldsChangesByRevisions, revisionsAutors) {
     addCheckbox(value_div, `${field}_diff`, 'Show as diff', diff_checked);
 
     var value_cell = tr.insertCell();
+    value_cell.hidden = !field_checked;
     var value_div = document.createElement('div');
     value_div.className = 'values';
     value_cell.appendChild(value_div);
