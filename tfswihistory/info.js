@@ -36,6 +36,39 @@ function getDiff(prev, curr) {
   return curr;
 }
 
+function renHis(field_selector_input, field_selector, fieldsChangesByRevisions, revisionsAutors) {
+  var ss = '';
+  var selected = localStorage.getItem(field_selector_input.id);
+  if (selected) {
+    field_selector_input.value = selected;
+    var s = new Map();
+    var field_values = fieldsChangesByRevisions[selected];
+    for (var cur_field_val_ind = 0; cur_field_val_ind < field_values.length; cur_field_val_ind++) {
+      var v = field_values[cur_field_val_ind];
+      var elapsed_time = getTimeDiff(cur_field_val_ind, field_values, revisionsAutors);
+      if (s.has(v.val)) {
+        s.set(v.val, s.get(v.val) + elapsed_time);
+      }
+      else {
+        s.set( v.val, elapsed_time );
+      }
+    }
+    var jo = {}  
+    s.forEach((value, key) => {  
+    jo[key] = formatTimePeriod(value)
+    });
+    ss = JSON.stringify(jo);
+  }
+  
+  var placeholder = document.getElementById('pivot');
+  while (placeholder.firstChild) {
+    placeholder.firstChild.remove();
+  }
+  placeholder.appendChild(field_selector_input);
+  placeholder.append(document.createTextNode(ss)); 
+  placeholder.appendChild(field_selector);
+}
+
 function renderFieldHistory(fieldsChangesByRevisions, revisionsAutors) {
   var field_selector_input = document.createElement('input');
   field_selector_input.id = 'field_selector_input';
@@ -51,38 +84,11 @@ function renderFieldHistory(fieldsChangesByRevisions, revisionsAutors) {
     field_selector.appendChild(option);
   }
 
-
-  var ss = '';
-  var selected = localStorage.getItem(field_selector_input.id);
-  if (selected) {
-    field_selector_input.value = selected;
-    var s = new Map();
-    //for (const value of fieldsChangesByRevisions[selected]) {
-    var field_values = fieldsChangesByRevisions[selected];
-    for (var cur_field_val_ind = 0; cur_field_val_ind < field_values.length; cur_field_val_ind++) {
-      var v = field_values[cur_field_val_ind];
-      var elapsed_time = getTimeDiff(cur_field_val_ind, field_values, revisionsAutors);
-      if (s.has(v.val)) {
-        s.set(v.val, s.get(v.val) + ' |  ' +elapsed_time + ' ');
-      }
-      else {
-        s.set( v.val, elapsed_time );
-      }
-    }
-    var jo = {}  
-    s.forEach((value, key) => {  
-    jo[key] = value  
-    });
-    ss = JSON.stringify(jo);
-  }
-  
-  var placeholder = document.getElementById('pivot');
-  placeholder.appendChild(field_selector_input);
-  placeholder.append(document.createTextNode(ss)); 
-  placeholder.appendChild(field_selector);
+  renHis(field_selector_input, field_selector, fieldsChangesByRevisions, revisionsAutors);
 
   field_selector_input.addEventListener('change', function () {
     localStorage.setItem(this.id, this.value);
+    renHis(field_selector_input, field_selector, fieldsChangesByRevisions, revisionsAutors);
   });
 }
 
@@ -150,7 +156,7 @@ function renderCellsEx(fieldsChangesByRevisions, revisionsAutors) {
       var field_changed_date = revisionsAutors[v.rev].dt;
       var field_changed_author = revisionsAutors[v.rev].author;
 
-      var elapsed_time = getTimeDiff(cur_field_val_ind, field_values, revisionsAutors);
+      var elapsed_time = formatTimePeriod(getTimeDiff(cur_field_val_ind, field_values, revisionsAutors));
 
       var value_tr = value_tbl.insertRow();
       value_tr.className = 'values';
@@ -231,7 +237,7 @@ function renderCells(cells, fieldsChangesByRevisions, revisionsAutors) {
         var next_field_value_rev = field_values[cur_field_val_ind + 1].rev;
         next_value_time = revisionsAutors[next_field_value_rev].dt
       }
-      var elapsed_time = timeDiff(field_changed_date, next_value_time);
+      var elapsed_time = formatTimePeriod(timeDiff(field_changed_date, next_value_time));
 
 
       var author = field_changed_author + '; ' + formatDateTime(field_changed_date) + '; ' + elapsed_time + '; [rev:' + v.rev + ']';
@@ -287,7 +293,7 @@ function renderWIInfo(imageinfo, revisionsAutors) {
   var datacells = divinfo.querySelectorAll('td');
 //  renderCells(datacells, imageinfo, revisionsAutors);
   renderCellsEx(imageinfo, revisionsAutors);
-  //renderFieldHistory(imageinfo, revisionsAutors);
+  renderFieldHistory(imageinfo, revisionsAutors);
 
 };
 

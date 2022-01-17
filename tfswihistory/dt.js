@@ -1,5 +1,3 @@
-//import {formatDateTime, timeDiff} from './time.js';
-
 function replace_timestamps() {
     var wi_ids = document.getElementsByClassName("work-item-form-id")
     if (wi_ids.length == 1) {
@@ -26,7 +24,7 @@ function replace_timestamps() {
 
                                 var timeinterval = "";
                                 if (i + 1 < comment.length) {
-                                    timeinterval = ` (+${timeDiff(cc[i + 1].modifiedDate, cc[i].modifiedDate)})`;
+                                    timeinterval = ` (+${formatTimePeriod(timeDiff(cc[i + 1].modifiedDate, cc[i].modifiedDate))})`;
                                 }
                                 timestamp.innerText = `${formatDateTime(cc[i].modifiedDate)}${timeinterval}`;
                                 i = i + 1;

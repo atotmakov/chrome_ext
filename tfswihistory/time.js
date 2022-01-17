@@ -13,15 +13,17 @@ function formatDateTime(str) {
 
 function formatTimePeriod(str) {
     var sec_num = parseInt(str, 10) / (1000 * 60);
-    var days = Math.floor(sec_num / (24 * 60));
-    var hours = Math.floor((sec_num - days * 24 * 60) / 60);
-    var minutes = Math.floor(sec_num - days * 24 * 60 - hours * 60);
+    var years = Math.floor(sec_num / (365 * 24 * 60)); 
+    var days = Math.floor((sec_num - years * 365 * 24 * 60) / (24 * 60));
+    var hours = Math.floor((sec_num - years * 365 * 24 * 60 - days * 24 * 60) / 60);
+    var minutes = Math.floor(sec_num - years * 365 * 24 * 60 - days * 24 * 60 - hours * 60);
 
     var res = ""
-    if (days > 0) { res = `${days} d`; }
-    if (hours > 0) { res = `${res} ${hours} h`; }
-    if (minutes > 0 && days < 1) { res = `${res} ${minutes} m`; }
-    if (days == 0 && hours == 0 && minutes == 0) { res = "0 s"; }
+    if (years > 0 ) { res = `${years}y `; }
+    if (days > 0) { res = `${res}${days}d `; }
+    if (hours > 0) { res = `${res}${hours}h `; }
+    if (minutes > 0 && days < 1) { res = `${res}${minutes}m` ; }
+    if (years ==0 && days == 0 && hours == 0 && minutes == 0) { res = `${Math.floor(sec_num * 60)}s`; }
     return res;
 }
 
@@ -33,7 +35,6 @@ function timeDiff(begin, end) {
     var b = new Date(begin);
     var e = new Date(end);
 
-    return formatTimePeriod(e - b);
+    //return formatTimePeriod(e - b);
+    return e - b;
 }
-
-//export { formatDateTime, timeDiff};
