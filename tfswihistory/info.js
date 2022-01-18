@@ -37,11 +37,10 @@ function getDiff(prev, curr) {
 }
 
 function renHis(field_selector_input, field_selector, fieldsChangesByRevisions, revisionsAutors) {
-  var ss = '';
+  var s = new Map();
   var selected = localStorage.getItem(field_selector_input.id);
   if (selected) {
     field_selector_input.value = selected;
-    var s = new Map();
     var field_values = fieldsChangesByRevisions[selected];
     for (var cur_field_val_ind = 0; cur_field_val_ind < field_values.length; cur_field_val_ind++) {
       var v = field_values[cur_field_val_ind];
@@ -53,20 +52,41 @@ function renHis(field_selector_input, field_selector, fieldsChangesByRevisions, 
         s.set( v.val, elapsed_time );
       }
     }
-    var jo = {}  
-    s.forEach((value, key) => {  
-    jo[key] = formatTimePeriod(value)
-    });
-    ss = JSON.stringify(jo);
   }
   
   var placeholder = document.getElementById('pivot');
   while (placeholder.firstChild) {
     placeholder.firstChild.remove();
   }
-  placeholder.appendChild(field_selector_input);
-  placeholder.append(document.createTextNode(ss)); 
-  placeholder.appendChild(field_selector);
+    
+  var title = document.createElement('div');
+  placeholder.appendChild(title);
+  title.className = 'title';
+  title.appendChild(document.createTextNode("Time statistics by field's value: "));
+  title.appendChild(field_selector_input);
+  title.appendChild(field_selector);
+
+  var tbl = document.createElement('table');
+  tbl.className = 'pivot';
+  var total = 0;
+  s.forEach((value, key) => { total += value; });
+  s.forEach((value, key) => {  
+    var tr = tbl.insertRow();
+
+    var field_cell = tr.insertCell();
+    field_cell.className = 'pivot';
+    field_cell.appendChild(document.createTextNode(key));
+
+    var value_cell = tr.insertCell();
+    value_cell.className = 'pivot';
+    value_cell.appendChild(document.createTextNode(formatTimePeriod(value)));
+
+    var percent_cell = tr.insertCell();
+    percent_cell.className = 'pivot';
+    percent_cell.appendChild(document.createTextNode(`${Math.floor((value/total * 1000))/10} %`));
+  });
+  placeholder.appendChild(tbl);
+  
 }
 
 function renderFieldHistory(fieldsChangesByRevisions, revisionsAutors) {
@@ -198,6 +218,11 @@ function renderCellsEx(fieldsChangesByRevisions, revisionsAutors) {
       rev_cell.appendChild(document.createTextNode(v.rev));
     }
   }
+  //var title = document.createTextNode("History by fields");
+  var title = document.createElement('div');
+  title.className = 'title';
+  title.appendChild(document.createTextNode("History by fields"));
+  document.getElementById('fields_table').appendChild(title);
   document.getElementById('fields_table').appendChild(tbl);
 }
 

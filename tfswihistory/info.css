@@ -1,5 +1,5 @@
 table {
-  width: 100%;
+  width: auto;
   border-collapse: collapse;
 }
 td, th {
@@ -35,6 +35,13 @@ td.author, td.date, td.time, td.revision {
   border: 1px solid #999;
 }
 
+.pivot {
+  border: 1px solid #999;
+  width: auto;
+  border-collapse: collapse;
+}
+
+
 
 .header-img {
   height: 30px;
@@ -44,6 +51,13 @@ td.author, td.date, td.time, td.revision {
 
 header h1 {
   display: inline;
+}
+
+.title {
+  font-size: large;
+  font-weight: bold;
+  margin-top:10px;
+  margin-bottom:5px;
 }
 
 .loader_class {
