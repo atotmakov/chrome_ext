@@ -322,20 +322,19 @@ function renderWIInfo(imageinfo, revisionsAutors) {
 
 };
 
-function renderWITitle(title, url, wi_type, icon_url) {
+function renderWITitle(id, fields, links, url, wi_type, icon_url) {
   var divurl = document.querySelector('#url');
 
   var wi_icon = document.createElement('img');
   wi_icon.src = icon_url;
   wi_icon.className = "header-img";
   divurl.appendChild(wi_icon);
-
-  var urltext = `${wi_type} ${title}`;
+  title = fields['System.Title'];
+  var urltext = `${wi_type} ${id} : ${title}`;
   var anchor = document.createElement('a');
   anchor.href = url;
   anchor.innerText = urltext;
   divurl.appendChild(anchor);
-
 };
 
 function get_history(tfs_url, wi_id, page_num, revisionsAutors, fieldsset) {
@@ -356,44 +355,6 @@ function get_history(tfs_url, wi_id, page_num, revisionsAutors, fieldsset) {
   xmlHttp.send(null);
 }
 
-function get_wi_title(tfs_url, wi_id) {
-  var urljson = tfs_url + '/_apis/wit/workitems/' + wi_id;
-  var xmlHttp = new XMLHttpRequest();
-  xmlHttp.open("GET", urljson, true); // false for synchronous request
-
-  xmlHttp.onload = function (e) {
-    if (xmlHttp.readyState === 4) {
-      if (xmlHttp.status === 200) {
-        var fields = JSON.parse(xmlHttp.responseText).fields;
-        var s = fields['System.Title'];
-        var wi_type = fields['System.WorkItemType'];
-        fill_wi_title(tfs_url, wi_id, wi_type, s);
-      } else {
-        console.error(xmlHttp.statusText);
-      }
-    }
-  };
-  xmlHttp.send(null);
-}
-
-function fill_wi_title(tfs_url, wi_id, wi_type, wi_title) {
-  var urljson = tfs_url + '/_apis/wit/workitemtypes/' + wi_type;
-  var xmlHttp = new XMLHttpRequest();
-  xmlHttp.open("GET", urljson, true);
-
-  xmlHttp.onload = function (e) {
-    if (xmlHttp.readyState === 4) {
-      if (xmlHttp.status === 200) {
-        var obj = JSON.parse(xmlHttp.responseText);
-        var icon_url = obj['icon']['url'];
-        renderWITitle(`${wi_id} : ${wi_title}`, tfs_url + '/_workitems/edit/' + wi_id, wi_type, icon_url);
-      } else {
-        console.error(xmlHttp.statusText);
-      }
-    }
-  };
-  xmlHttp.send(null);
-}
 
 function extract_fields_and_authors(json_onject, fieldsset) {
   var revisionsAutors = [];
@@ -480,7 +441,7 @@ document.addEventListener("DOMContentLoaded", function () {
   var wi_id = window.location.hash.substring(1);
   var tfs_url = window.location.search.substring(1);
   if (tfs_url) {
-    get_wi_title(tfs_url, wi_id);
+    get_wi(tfs_url, wi_id, renderWITitle);
     get_history(tfs_url, wi_id, 0, null, null);
   }
 });

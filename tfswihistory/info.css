@@ -48,6 +48,12 @@ td.author, td.date, td.time, td.revision {
   width: 30px;
 }
 
+.wi_type_icon {
+  height: 20px;
+  width: 20px;
+}
+
+
 
 header h1 {
   display: inline;
