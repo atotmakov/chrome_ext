@@ -4,7 +4,7 @@ function get_wi(tfs_url, wi_id, callback) {
         urljson += '/_apis/wit/workitems/' + wi_id;
     }
     else {
-        wi_id = tfs_url;
+        wi_id = tfs_url.substr(tfs_url.lastIndexOf('/') + 1);
     }
 
     urljson += '?$expand=Relations';
