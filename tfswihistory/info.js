@@ -39,7 +39,7 @@ function getDiff(prev, curr) {
 function renHis(field_selector_input, field_selector, fieldsChangesByRevisions, revisionsAutors) {
   var s = new Map();
   var selected = localStorage.getItem(field_selector_input.id);
-  if (selected) {
+  if (selected && selected in fieldsChangesByRevisions) {
     field_selector_input.value = selected;
     var field_values = fieldsChangesByRevisions[selected];
     for (var cur_field_val_ind = 0; cur_field_val_ind < field_values.length; cur_field_val_ind++) {
@@ -135,7 +135,7 @@ function getTimeDiff(index, array_values, array_dates) {
   var next_value_time = null;
   if (cur_field_val_ind + 1 < field_values.length) {
     var next_field_value_rev = field_values[cur_field_val_ind + 1].rev;
-    next_value_time = revisionsAutors[next_field_value_rev].dt
+    next_value_time = revisionsAutors[next_field_value_rev].dt;
   }
   return timeDiff(field_changed_date, next_value_time);
 }
@@ -358,7 +358,6 @@ function get_history(tfs_url, wi_id, page_num, revisionsAutors, fieldsset) {
 
 function extract_fields_and_authors(json_onject, fieldsset) {
   var revisionsAutors = [];
-  revisionsAutors[0] = 'skip zero index to align with tfs revisions, which started from 1';
 
   var obj = json_onject;
 
@@ -366,7 +365,7 @@ function extract_fields_and_authors(json_onject, fieldsset) {
   for (var i = 0; i < obj.count; i++) { //iterate through revisions
     var fields = obj.value[i].fields;
     var revision = obj.value[i].rev;
-    revisionsAutors[i+1] = { author: fields['System.ChangedBy']['displayName'], dt: fields['System.ChangedDate'] };
+    revisionsAutors[i] = { author: fields['System.ChangedBy']['displayName'], dt: fields['System.ChangedDate'] };
 
     //for each revision azure returns not all fields
     //in case when field became undefinded, azure do not returns it in fields revision list
@@ -418,6 +417,7 @@ function get_history_handler(tfs_url, wi_id, page_num, revisionsAutors, fieldsse
   }
 
   if (obj.count == 0) { //all data loaded
+    revisionsAutors.splice(0, 0, 'skip zero index to align with tfs revisions, which started from 1');
     renderWIInfo(fieldsset, revisionsAutors);
 
     for (let checkbox of document.querySelectorAll('input[type=checkbox]')) {
