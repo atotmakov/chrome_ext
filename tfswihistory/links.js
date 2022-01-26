@@ -3,40 +3,21 @@ document.addEventListener("DOMContentLoaded", function () {
     var tfs_url = window.location.search.substring(1);
     if (tfs_url) {
         let deep = 0;
-        get_wi(tfs_url, wi_id, (id, fields, links, url, wi_type, icon_url) => { render_root_wi(id, fields, links, url, wi_type, icon_url, true, deep, 'root', 'links_table') });
+        let placeholder = document.getElementById('links_table');
+        get_wi(tfs_url, wi_id, (id, fields, links, url, wi_type, icon_url) => { render_root_wi(id, fields, links, url, wi_type, icon_url, true, deep, 'root', placeholder) });
     }
 });
 
 var already = new Map();
 
-function render_root_wi(id, fields, links, url, wi_type, icon_url, goto_links, deep, link_type, parent_id) {
-/*    if (already.has(id)) { 
-        if (already.get(id) == true) {
-            already.set(id, false);
-            id = 0;
-        }
-        else {
-            return;
-        }
-    }
-    else {
-        already.set(id, true);    
-    }*/
-
-    var ph = null;//document.getElementById(parent_id);
+function render_root_wi(id, fields, links, url, wi_type, icon_url, goto_links, deep, link_type, parent_node) {
+  
+    let parent = parent_node ? parent_node : document;
     
-    //var ph = document;
-
-    for (let cell of document.getElementsByClassName(parent_id)) {
-        if (cell.getElementsByClassName(id).length == 0)
-            ph = cell;
-    }
-    
-    if (ph == null)
-        return;
-
-    var placeholder = document.createElement('div');
-    placeholder.style.paddingLeft = `${deep}0px`;
+    let ph = parent;
+        
+    let placeholder = document.createElement('div');
+    placeholder.style.paddingLeft = `${4}0px`;
     //placeholder.id = id;
     placeholder.className = id;
     ph.appendChild(placeholder);
@@ -55,9 +36,8 @@ function render_root_wi(id, fields, links, url, wi_type, icon_url, goto_links, d
     anchor.innerText = urltext;
     placeholder.appendChild(anchor);
 
-    //if (goto_links) {
-    if (!already.has(id)/* || already.get(id) < 5*/) {    
-        render_links(placeholder, links, deep, id);
+    if (goto_links && !already.has(id)/* || already.get(id) < 5*/) {    
+        render_links(placeholder, links, deep, placeholder);
     }
     if (already.has(id)) {
         already.set(id, already.get(id) + 1);
@@ -67,13 +47,17 @@ function render_root_wi(id, fields, links, url, wi_type, icon_url, goto_links, d
     }
 };
 
-function render_links(placeholder, links, deep, parent_id) {
-    deep = 4;
+function render_links(placeholder, links, deep, parent_node) {
+    deep += 1;
     for (let link of links) {
+        if (link.rel == 'ArtifactLink') //'System.LinkTypes.Related'
+            continue;
         let url = link['url'];
         let link_type = link["attributes"].name;
 
-        get_wi(url, 0, (id, fields, links, url, wi_type, icon_url) => { render_root_wi(id, fields, links, url, wi_type, icon_url, deep < 50, deep, link_type, parent_id) });
+        console.log(link.rel);
+
+        get_wi(url, 0, (id, fields, links, url, wi_type, icon_url) => { render_root_wi(id, fields, links, url, wi_type, icon_url, deep < 4, deep, link_type, parent_node) });
     }
 }
 
