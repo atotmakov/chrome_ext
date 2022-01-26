@@ -20,7 +20,8 @@ function get_wi(tfs_url, wi_id, callback) {
                 var wi_links = obj.relations;
                 var wi_type = wi_fields['System.WorkItemType'];
                 var type_link = obj._links['workItemType'].href;
-                get_wi_icon(type_link, wi_id, wi_type, wi_fields, wi_links, callback);
+                let html_link = obj._links["html"].href;
+                get_wi_icon(type_link, wi_id, wi_type, wi_fields, wi_links, html_link, callback);
             } else {
                 console.error(xmlHttp.statusText);
             }
@@ -29,7 +30,7 @@ function get_wi(tfs_url, wi_id, callback) {
     xmlHttp.send(null);
 }
 
-function get_wi_icon(tfs_url, wi_id, wi_type, wi_fields, wi_links, callback) {
+function get_wi_icon(tfs_url, wi_id, wi_type, wi_fields, wi_links, html_link, callback) {
     var urljson = tfs_url;// + '/_apis/wit/workitemtypes/' + wi_type;
     var xmlHttp = new XMLHttpRequest();
     xmlHttp.open("GET", urljson, true);
@@ -39,7 +40,7 @@ function get_wi_icon(tfs_url, wi_id, wi_type, wi_fields, wi_links, callback) {
             if (xmlHttp.status === 200) {
                 var obj = JSON.parse(xmlHttp.responseText);
                 var icon_url = obj['icon']['url'];
-                callback(wi_id, wi_fields, wi_links, tfs_url + '/_workitems/edit/' + wi_id, wi_type, icon_url);
+                callback(wi_id, wi_fields, wi_links, html_link, wi_type, icon_url);
             } else {
                 console.error(xmlHttp.statusText);
             }
