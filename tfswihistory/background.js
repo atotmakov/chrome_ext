@@ -26,12 +26,12 @@ chrome.runtime.onInstalled.addListener(function() {
     "contexts": ["selection"]
   });
   
-  chrome.contextMenus.create({
+/*  chrome.contextMenus.create({
     "id": "workitem_links_menu_id",
     "title": "Get Azure DevOps Workitem Links",
     "type": "normal",
     "contexts": ["selection"]
-  });
+  });*/
 });
 
 
