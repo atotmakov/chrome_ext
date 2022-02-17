@@ -36,12 +36,10 @@ function getDiff(prev, curr) {
   return curr;
 }
 
-function renHis(field_selector_input, field_selector, fieldsChangesByRevisions, revisionsAutors) {
+function renderFieldsPivotTable(field_selector_input, fieldsChangesByRevisions, revisionsAutors) {
   var s = new Map();
-  var selected = localStorage.getItem(field_selector_input.id);
-  if (selected && selected in fieldsChangesByRevisions) {
-    field_selector_input.value = selected;
-    var field_values = fieldsChangesByRevisions[selected];
+    if (field_selector_input.value) {    
+    var field_values = fieldsChangesByRevisions[field_selector_input.value];
     for (var cur_field_val_ind = 0; cur_field_val_ind < field_values.length; cur_field_val_ind++) {
       var v = field_values[cur_field_val_ind];
       var elapsed_time = getTimeDiff(cur_field_val_ind, field_values, revisionsAutors);
@@ -64,7 +62,6 @@ function renHis(field_selector_input, field_selector, fieldsChangesByRevisions, 
   title.className = 'title';
   title.appendChild(document.createTextNode("Time statistics by field's value: "));
   title.appendChild(field_selector_input);
-  title.appendChild(field_selector);
 
   var tbl = document.createElement('table');
   tbl.className = 'pivot';
@@ -89,26 +86,37 @@ function renHis(field_selector_input, field_selector, fieldsChangesByRevisions, 
   
 }
 
-function renderFieldHistory(fieldsChangesByRevisions, revisionsAutors) {
-  var field_selector_input = document.createElement('input');
-  field_selector_input.id = 'field_selector_input';
+function addInputList(parent, id, values, selected_value) {
+  let field_selector_input = document.createElement('input');
+  field_selector_input.id = id;
   field_selector_input.type = 'text';
   field_selector_input.setAttribute('list', 'field_selector') ;
 
-  var field_selector = document.createElement('datalist');
+  let selected = selected_value;
+  let field_selector = document.createElement('datalist');
   field_selector.id = 'field_selector';
-
-  for (const [field, field_values] of Object.entries(fieldsChangesByRevisions)) {
-    var option = document.createElement('option');
+  for (let field in values) {
+    let option = document.createElement('option');
     option.value = field;
     field_selector.appendChild(option);
+    if (selected == field) {
+      field_selector_input.value = field;
+    }
   }
+  field_selector_input.appendChild(field_selector);
+  return field_selector_input;
+}
 
-  renHis(field_selector_input, field_selector, fieldsChangesByRevisions, revisionsAutors);
+function renderTimeStatisticByField(fieldsChangesByRevisions, revisionsAutors) {
+  let id = 'field_selector_input';
+  let selected = localStorage.getItem(id);
+  let field_selector_input = addInputList(0, id, fieldsChangesByRevisions, selected);
+
+  renderFieldsPivotTable(field_selector_input, fieldsChangesByRevisions, revisionsAutors);
 
   field_selector_input.addEventListener('change', function () {
     localStorage.setItem(this.id, this.value);
-    renHis(field_selector_input, field_selector, fieldsChangesByRevisions, revisionsAutors);
+    renderFieldsPivotTable(field_selector_input, field_selector, fieldsChangesByRevisions, revisionsAutors);
   });
 }
 
@@ -218,79 +226,13 @@ function renderCellsEx(fieldsChangesByRevisions, revisionsAutors) {
       rev_cell.appendChild(document.createTextNode(v.rev));
     }
   }
-  //var title = document.createTextNode("History by fields");
+  
   var title = document.createElement('div');
   title.className = 'title';
   title.appendChild(document.createTextNode("History by fields"));
   document.getElementById('fields_table').appendChild(title);
   document.getElementById('fields_table').appendChild(tbl);
 }
-
-function renderCells(cells, fieldsChangesByRevisions, revisionsAutors) {
-  var tbody = document.getElementById('tbody');
-
-  for (const [field, field_values] of Object.entries(fieldsChangesByRevisions)) {
-    
-    var tr = "<tr class = 'rendered'>";
-
-    var diff_id = `${field}_diff`;
-    var diff_on = localStorage.getItem(diff_id);
-    if (diff_on && diff_on == 'true') {
-      diff_on = true;
-    } else {
-      diff_on = false;
-    }
-    var checked = '';
-    if (diff_on) {
-      checked = 'checked';
-    }
-
-    var diffcheckbox = `<input type='checkbox' id='${diff_id}' ${checked}> Show as diff`
-
-    var s = `<table>`;
-
-    var prev = '';
-    for (var cur_field_val_ind = 0, next_field_val_ind = 1; cur_field_val_ind < field_values.length; cur_field_val_ind++, next_field_val_ind ++) {
-    //for (const v of field_values) {
-      var v = field_values[cur_field_val_ind];
-      
-      var field_changed_date = revisionsAutors[v.rev].dt;
-      var field_changed_author = revisionsAutors[v.rev].author;
-
-      var next_value_time = null;
-      if (cur_field_val_ind + 1 < field_values.length) {
-        var next_field_value_rev = field_values[cur_field_val_ind + 1].rev;
-        next_value_time = revisionsAutors[next_field_value_rev].dt
-      }
-      var elapsed_time = formatTimePeriod(timeDiff(field_changed_date, next_value_time));
-
-
-      var author = field_changed_author + '; ' + formatDateTime(field_changed_date) + '; ' + elapsed_time + '; [rev:' + v.rev + ']';
-
-      var val = v.val;
-      if (diff_on) {
-        var val = getDiff(prev, v.val);
-      }
-
-      s += '<tr = class="values"><td>' + val + '</td><td class = "rev">' + author + '</td></tr>';
-      prev = v.val;
-    }
-
-    s += '</table>';
-
-    var checked = 'checked';
-    var hidden = '';
-    var val = localStorage.getItem(field);
-    if (val && val == 'false') {
-      checked = '';
-      hidden = 'hidden';
-    }
-
-    tr += `<td class="key"><input type="checkbox" id="${field}" ${checked}>${field}<div ${hidden}><p>${diffcheckbox}</div></td><td ${hidden}>${s}</td></tr>`;
-
-    tbody.innerHTML += tr;
-  }
-};
 
 function resizeWindow() {
   window.setTimeout(function () {
@@ -312,13 +254,10 @@ function renderWIInfo(imageinfo, revisionsAutors) {
   divoutput.style.display = "block";
 
   var divinfo = document.querySelector('#info');
-  var divexif = document.querySelector('#exif');
-
-
+  
   var datacells = divinfo.querySelectorAll('td');
-//  renderCells(datacells, imageinfo, revisionsAutors);
   renderCellsEx(imageinfo, revisionsAutors);
-  renderFieldHistory(imageinfo, revisionsAutors);
+  renderTimeStatisticByField(imageinfo, revisionsAutors);
 
 };
 
