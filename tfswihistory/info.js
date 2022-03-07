@@ -114,7 +114,7 @@ function renderTimeStatisticByField(fieldsChangesByRevisions, revisionsAutors) {
 
   field_selector_input.addEventListener('change', function () {
     localStorage.setItem(this.id, this.value);
-    renderFieldsPivotTable(field_selector_input, field_selector, fieldsChangesByRevisions, revisionsAutors);
+    renderFieldsPivotTable(field_selector_input, fieldsChangesByRevisions, revisionsAutors);
   });
 }
 
