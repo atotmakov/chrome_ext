@@ -1,5 +1,3 @@
-//import * as dddif from './lib/diff.js';
-
 function html2text(html) {
   html = html.toString();
   html = html.replace(/<style([\s\S]*?)<\/style>/gi, '');
@@ -38,7 +36,7 @@ function getDiff(prev, curr) {
 
 function renderFieldsPivotTable(field_selector_input, fieldsChangesByRevisions, revisionsAutors) {
   var s = new Map();
-    if (field_selector_input.value) {    
+  if (field_selector_input.value) {
     var field_values = fieldsChangesByRevisions[field_selector_input.value];
     for (var cur_field_val_ind = 0; cur_field_val_ind < field_values.length; cur_field_val_ind++) {
       var v = field_values[cur_field_val_ind];
@@ -47,16 +45,16 @@ function renderFieldsPivotTable(field_selector_input, fieldsChangesByRevisions, 
         s.set(v.val, s.get(v.val) + elapsed_time);
       }
       else {
-        s.set( v.val, elapsed_time );
+        s.set(v.val, elapsed_time);
       }
     }
   }
-  
+
   var placeholder = document.getElementById('pivot');
   while (placeholder.firstChild) {
     placeholder.firstChild.remove();
   }
-    
+
   var title = document.createElement('div');
   placeholder.appendChild(title);
   title.className = 'title';
@@ -67,7 +65,7 @@ function renderFieldsPivotTable(field_selector_input, fieldsChangesByRevisions, 
   tbl.className = 'pivot';
   var total = 0;
   s.forEach((value, key) => { total += value; });
-  s.forEach((value, key) => {  
+  s.forEach((value, key) => {
     var tr = tbl.insertRow();
 
     var field_cell = tr.insertCell();
@@ -80,17 +78,17 @@ function renderFieldsPivotTable(field_selector_input, fieldsChangesByRevisions, 
 
     var percent_cell = tr.insertCell();
     percent_cell.className = 'pivot';
-    percent_cell.appendChild(document.createTextNode(`${Math.floor((value/total * 1000))/10} %`));
+    percent_cell.appendChild(document.createTextNode(`${Math.floor((value / total * 1000)) / 10} %`));
   });
   placeholder.appendChild(tbl);
-  
+
 }
 
 function addInputList(parent, id, values, selected_value) {
   let field_selector_input = document.createElement('input');
   field_selector_input.id = id;
   field_selector_input.type = 'text';
-  field_selector_input.setAttribute('list', 'field_selector') ;
+  field_selector_input.setAttribute('list', 'field_selector');
 
   let selected = selected_value;
   let field_selector = document.createElement('datalist');
@@ -120,8 +118,7 @@ function renderTimeStatisticByField(fieldsChangesByRevisions, revisionsAutors) {
   });
 }
 
-function addCheckbox(parent, id, text, checked)
-{
+function addCheckbox(parent, id, text, checked) {
   var checkbox = document.createElement('input');
   checkbox.type = "checkbox";
   checkbox.id = id;
@@ -160,11 +157,11 @@ function renderCellsEx(fieldsChangesByRevisions, revisionsAutors) {
     var field_checked = localStorage.getItem(field);
     field_checked = !(field_checked && field_checked == 'false');
     var val_cb = addCheckbox(field_cell, field, field, field_checked);
-   
+
     var value_div = document.createElement('div');
     value_div.hidden = !field_checked;
     field_cell.appendChild(value_div);
-    
+
     var diff_checked = localStorage.getItem(`${field}_diff`);
     diff_checked = (diff_checked && diff_checked == 'true');
     addCheckbox(value_div, `${field}_diff`, 'Show as diff', diff_checked);
@@ -180,7 +177,7 @@ function renderCellsEx(fieldsChangesByRevisions, revisionsAutors) {
 
     for (var cur_field_val_ind = 0; cur_field_val_ind < field_values.length; cur_field_val_ind++) {
       var v = field_values[cur_field_val_ind];
-      
+
       var field_changed_date = revisionsAutors[v.rev].dt;
       var field_changed_author = revisionsAutors[v.rev].author;
 
@@ -188,7 +185,7 @@ function renderCellsEx(fieldsChangesByRevisions, revisionsAutors) {
 
       var value_tr = value_tbl.insertRow();
       value_tr.className = 'values';
-            
+
       var val_cell = value_tr.insertCell();
       val_cell.className = 'values';
       var content = document.createElement('label');
@@ -197,18 +194,18 @@ function renderCellsEx(fieldsChangesByRevisions, revisionsAutors) {
       if (val_cell_display_content == null) {
         val_cell.className = 'deleted_values';
         if (cur_field_val_ind > 0) {
-          val_cell_display_content = field_values[cur_field_val_ind-1].val;
+          val_cell_display_content = field_values[cur_field_val_ind - 1].val;
         }
         else {
           val_cell_display_content = ''
         }
       }
       else if (diff_checked && (cur_field_val_ind > 0)) {
-        val_cell_display_content = getDiff(field_values[cur_field_val_ind-1].val, val_cell_display_content);
+        val_cell_display_content = getDiff(field_values[cur_field_val_ind - 1].val, val_cell_display_content);
       }
       content.innerHTML = formatDateTime(val_cell_display_content);
       val_cell.appendChild(content);
-      
+
       var author_cell = value_tr.insertCell();
       author_cell.className = 'author';
       author_cell.appendChild(document.createTextNode(field_changed_author));
@@ -226,7 +223,7 @@ function renderCellsEx(fieldsChangesByRevisions, revisionsAutors) {
       rev_cell.appendChild(document.createTextNode(v.rev));
     }
   }
-  
+
   var title = document.createElement('div');
   title.className = 'title';
   title.appendChild(document.createTextNode("History by fields"));
@@ -254,7 +251,7 @@ function renderWIInfo(imageinfo, revisionsAutors) {
   divoutput.style.display = "block";
 
   var divinfo = document.querySelector('#info');
-  
+
   var datacells = divinfo.querySelectorAll('td');
   renderCellsEx(imageinfo, revisionsAutors);
   renderTimeStatisticByField(imageinfo, revisionsAutors);
@@ -313,11 +310,10 @@ function extract_fields_and_authors(json_onject, fieldsset) {
       all_possible_fileds_names.add(name);
     }
 
-    for (var name of all_possible_fileds_names.values())
-    {
+    for (var name of all_possible_fileds_names.values()) {
       var value = fields[name];
       var string_value = value;
-      if(value) {
+      if (value) {
         if (typeof value !== 'string' && value['displayName']) {
           string_value = value['displayName'];
         }
@@ -325,7 +321,7 @@ function extract_fields_and_authors(json_onject, fieldsset) {
       else {
         string_value = null;
       }
-  
+
       if (fieldsset[name]) {
         if (fieldsset[name][fieldsset[name].length - 1].val != string_value)
           fieldsset[name].push({ rev: revision, val: string_value });
