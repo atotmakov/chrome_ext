@@ -30,6 +30,6 @@ jobs:
         run: ls
       - name: Run Jest
         uses: stefanoeb/jest-action@1.0.3
-          with:
-            jestArgs: tfswihistory
+        with:
+          jestArgs: tfswihistory
           
