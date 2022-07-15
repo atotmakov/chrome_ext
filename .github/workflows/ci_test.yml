@@ -32,4 +32,6 @@ jobs:
         uses: stefanoeb/jest-action@1.0.3
         with:
           jestArgs: tfswihistory
+      - name: runjestma
+        run: ls | npm jest
           
