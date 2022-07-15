@@ -30,6 +30,8 @@ jobs:
       # You may pin to the exact commit or the version.
       # uses: willcaul/jest-github-action@1530da6bb81a1593734e7f175bd872f992f0882e
         uses: willcaul/jest-github-action@v1.0.2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           # The test command to run
           #test-command: # optional, default is npm test
