@@ -26,12 +26,18 @@ jobs:
     steps:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - uses: actions/checkout@v3
-      - name: where
-        run: ls
-      - name: Run Jest
-        uses: stefanoeb/jest-action@1.0.3
+      - name: Jest GitHub Action
+      # You may pin to the exact commit or the version.
+      # uses: willcaul/jest-github-action@1530da6bb81a1593734e7f175bd872f992f0882e
+        uses: willcaul/jest-github-action@v1.0.2
         with:
-          jestArgs: tfswihistory
-      - name: runjestma
-        run: ls | npm jest
+          # The test command to run
+          #test-command: # optional, default is npm test
+          # Subdirectory to run tests in
+          working-directory: ./tfswihistory
+          # Comment PRs with code coverage
+          #coverage-comment: # optional, default is true
+          # Only run tests on changed files (over base branch)
+          #changes-only: # optional, default is false
+
           
