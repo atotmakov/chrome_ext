@@ -39,7 +39,6 @@ jobs:
       #- name: npm tests
       #  run: ./tfswihistory/npm test
       - name: Run Jest
-      # You may pin to the exact commit or the version.
-      # uses: stefanoeb/jest-action@f9bb23f509cde20ee9b494f0496d1d3323861cc4
-        uses: stefanoeb/jest-action@1.0.4
-
+        uses: stefanoeb/jest-action@1.0.3
+        with:
+          jestArgs: ./tfswihistory/time.test.js
