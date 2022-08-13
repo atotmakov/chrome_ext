@@ -1,11 +1,9 @@
+function get_wi_link(tfs_url, wi_id) {
+    return `${tfs_url}/_apis/wit/workitems/${wi_id}`;
+}
+
 function get_wi(tfs_url, wi_id, callback, xmlHttp = new XMLHttpRequest()) {
     var urljson = tfs_url;
-    if (wi_id != 0) {
-        urljson += '/_apis/wit/workitems/' + wi_id;
-    }
-    else {
-        wi_id = tfs_url.substr(tfs_url.lastIndexOf('/') + 1);
-    }
 
     urljson += '?$expand=Relations';
 
@@ -15,6 +13,7 @@ function get_wi(tfs_url, wi_id, callback, xmlHttp = new XMLHttpRequest()) {
         if (xmlHttp.readyState === 4) {
             if (xmlHttp.status === 200) {
                 var obj = JSON.parse(xmlHttp.responseText);
+                let wi_id = obj.id;
                 var wi_fields = obj.fields;
                 var wi_links = obj.relations;
                 var wi_type = wi_fields['System.WorkItemType'];
@@ -46,4 +45,4 @@ function get_wi_icon(tfs_url, wi_id, wi_type, wi_fields, wi_links, html_link, ca
     xmlHttp.send(null);
 }
 
-module.exports = { get_wi, get_wi_icon, };
+module.exports = { get_wi, get_wi_icon, get_wi_link};

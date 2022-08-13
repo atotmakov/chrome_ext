@@ -13,8 +13,10 @@ app.get("/get_wi_icon", (req, res) => {
 //})
 
 app.get("/get_wi/_apis/wit/workitems/1", (req, res) => {
-  let result = { fields: { 'System.WorkItemType': 'witype' }, relations: {}, _links: { 'workItemType': { href: 'http://localhost:3333/get_wi_icon' }, 'html': { href: 'htmllink' } } };
-
+  let result = { id : 1,
+                 fields: { 'System.WorkItemType': 'witype' }, 
+                 relations: {},
+                  _links: { 'workItemType': { href: `${req.protocol}://${req.hostname}:${req.client.localPort}/get_wi_icon` }, 'html': { href: 'htmllink' } } };
   return res.status(200).json(result);
 });
 

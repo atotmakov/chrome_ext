@@ -4,7 +4,8 @@ document.addEventListener("DOMContentLoaded", function () {
     if (tfs_url) {
         let deep = 0;
         let placeholder = document.getElementById('links_table');
-        get_wi(tfs_url, wi_id, (id, fields, links, url, wi_type, icon_url) => { render_root_wi(id, fields, links, url, wi_type, icon_url, true, deep, 'root', placeholder) });
+        let wi_link = get_wi_link(tfs_url, wi_id);
+        get_wi(wi_link, 0, (id, fields, links, url, wi_type, icon_url) => { render_root_wi(id, fields, links, url, wi_type, icon_url, true, deep, 'root', placeholder) });
     }
 });
 

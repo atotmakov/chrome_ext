@@ -376,7 +376,8 @@ document.addEventListener("DOMContentLoaded", function () {
   var wi_id = window.location.hash.substring(1);
   var tfs_url = window.location.search.substring(1);
   if (tfs_url) {
-    get_wi(tfs_url, wi_id, renderWITitle);
+    let wi_link = get_wi_link(tfs_url, wi_id);
+    get_wi(wi_link, 0, renderWITitle);
     get_history(tfs_url, wi_id, 0, null, null);
   }
 });
