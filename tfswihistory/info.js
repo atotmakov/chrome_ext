@@ -84,15 +84,15 @@ function renderFieldsPivotTable(field_selector_input, fieldsChangesByRevisions, 
 
 }
 
-function addInputList(parent, id, values, selected_value) {
+function addInputList(id, values, selected_value) {
   let field_selector_input = document.createElement('input');
   field_selector_input.id = id;
   field_selector_input.type = 'text';
-  field_selector_input.setAttribute('list', 'field_selector');
+  field_selector_input.setAttribute('list', 'field_selector_' + id);
 
   let selected = selected_value;
   let field_selector = document.createElement('datalist');
-  field_selector.id = 'field_selector';
+  field_selector.id = 'field_selector_' + id;
   for (let field in values) {
     let option = document.createElement('option');
     option.value = field;
@@ -108,7 +108,7 @@ function addInputList(parent, id, values, selected_value) {
 function renderTimeStatisticByField(fieldsChangesByRevisions, revisionsAutors) {
   let id = 'field_selector_input';
   let selected = localStorage.getItem(id);
-  let field_selector_input = addInputList(0, id, fieldsChangesByRevisions, selected);
+  let field_selector_input = addInputList(id, fieldsChangesByRevisions, selected);
 
   renderFieldsPivotTable(field_selector_input, fieldsChangesByRevisions, revisionsAutors);
 
@@ -147,33 +147,43 @@ function getTimeDiff(index, array_values, array_dates) {
 
 function renderCellsEx(fieldsChangesByRevisions, revisionsAutors) {
   var tbl = document.createElement('table');
+  tbl.id = 'values_table';
+
+  let header_tr = tbl.insertRow();
+  var author_cell = header_tr.insertCell();
+  author_cell.appendChild(document.createTextNode('Field'));
+  var author_cell = header_tr.insertCell();
+  author_cell.appendChild(document.createTextNode('Value'));
+  var author_cell = header_tr.insertCell();
+  author_cell.appendChild(document.createTextNode('Author'));
+  /*let author_input = addInputList(12134, null, 0);
+  author_cell.appendChild(author_input);
+  author_input.addEventListener('input', function () {
+    //hide
+    var table = document.getElementById('values_table');
+    for (var i = 1, row; row = table.rows[i]; i++) {
+      let hide = row.cells[2].textContent.toLowerCase().includes(this.value.toLowerCase());
+
+      let start = 6 - row.cells.length;
+      for (var j = start, col; col = row.cells[j]; j++) {
+        col.hidden = !hide;
+      }
+    }
+  });*/
+  var author_cell = header_tr.insertCell();
+  author_cell.appendChild(document.createTextNode('Date'));
+  var author_cell = header_tr.insertCell();
+  author_cell.appendChild(document.createTextNode('Time'));
+  var author_cell = header_tr.insertCell();
+  author_cell.appendChild(document.createTextNode('Rev'));
 
   for (const [field, field_values] of Object.entries(fieldsChangesByRevisions)) {
-    var tr = tbl.insertRow();
-    tr.className = 'rendered';
-
-    var field_cell = tr.insertCell();
-    field_cell.className = 'key';
-    var field_checked = localStorage.getItem(field);
-    field_checked = !(field_checked && field_checked == 'false');
-    var val_cb = addCheckbox(field_cell, field, field, field_checked);
-
-    var value_div = document.createElement('div');
-    value_div.hidden = !field_checked;
-    field_cell.appendChild(value_div);
-
     var diff_checked = localStorage.getItem(`${field}_diff`);
     diff_checked = (diff_checked && diff_checked == 'true');
-    addCheckbox(value_div, `${field}_diff`, 'Show as diff', diff_checked);
+    var value_tbl = tbl;
 
-    var value_cell = tr.insertCell();
-    value_cell.hidden = !field_checked;
-    var value_div = document.createElement('div');
-    value_div.className = 'values';
-    value_cell.appendChild(value_div);
-    var value_tbl = document.createElement('table');
-    value_div.appendChild(value_tbl);
-
+    let field_checked = localStorage.getItem(field);
+    field_checked = !(field_checked && field_checked == 'false');
 
     for (var cur_field_val_ind = 0; cur_field_val_ind < field_values.length; cur_field_val_ind++) {
       var v = field_values[cur_field_val_ind];
@@ -186,8 +196,22 @@ function renderCellsEx(fieldsChangesByRevisions, revisionsAutors) {
       var value_tr = value_tbl.insertRow();
       value_tr.className = 'values';
 
+
+      if (cur_field_val_ind == 0) {
+        var field_cell = value_tr.insertCell();
+        field_cell.className = 'key';
+        field_cell.rowSpan = field_values.length;
+
+        addCheckbox(field_cell, field, field, field_checked);
+        var value_div = document.createElement('div');
+        value_div.hidden = !field_checked;
+        field_cell.appendChild(value_div);
+        addCheckbox(value_div, `${field}_diff`, 'Show as diff', diff_checked);
+      }
+
       var val_cell = value_tr.insertCell();
       val_cell.className = 'values';
+      val_cell.hidden = !field_checked;
       var content = document.createElement('label');
 
       var val_cell_display_content = v.val;
@@ -208,18 +232,22 @@ function renderCellsEx(fieldsChangesByRevisions, revisionsAutors) {
 
       var author_cell = value_tr.insertCell();
       author_cell.className = 'author';
+      author_cell.hidden = !field_checked;
       author_cell.appendChild(document.createTextNode(field_changed_author));
 
       var date_cell = value_tr.insertCell();
       date_cell.className = 'date';
+      date_cell.hidden = !field_checked;
       date_cell.appendChild(document.createTextNode(formatDateTime(field_changed_date)));
 
       var elapsed_cell = value_tr.insertCell();
       elapsed_cell.className = 'time';
+      elapsed_cell.hidden = !field_checked;
       elapsed_cell.appendChild(document.createTextNode(elapsed_time));
 
       var rev_cell = value_tr.insertCell();
       rev_cell.className = 'revision';
+      rev_cell.hidden = !field_checked;
       rev_cell.appendChild(document.createTextNode(v.rev));
     }
   }
@@ -227,6 +255,8 @@ function renderCellsEx(fieldsChangesByRevisions, revisionsAutors) {
   var title = document.createElement('div');
   title.className = 'title';
   title.appendChild(document.createTextNode("History by fields"));
+  let header = document.createElement('div');
+
   document.getElementById('fields_table').appendChild(title);
   document.getElementById('fields_table').appendChild(tbl);
 }
@@ -358,12 +388,14 @@ function get_history_handler(tfs_url, wi_id, page_num, revisionsAutors, fieldsse
     for (let checkbox of document.querySelectorAll('input[type=checkbox]')) {
       checkbox.addEventListener('change', function () {
         localStorage.setItem(this.id, this.checked);
-        if (this.parentElement.nextElementSibling) {
+        /*if (this.parentElement.nextElementSibling) {
+          //hide value cells
           this.parentElement.nextElementSibling.hidden = !this.checked;
-          this.nextElementSibling.nextElementSibling.hidden = !this.checked
-        } else {
-          location.reload();
-        }
+          //hide "show diff checkbox"
+          this.nextElementSibling.nextElementSibling.hidden = !this.checked 
+        } else {*/
+        location.reload();
+        //}
       });
     }
   }
