@@ -5,7 +5,7 @@ document.addEventListener("DOMContentLoaded", function () {
         let deep = 0;
         let placeholder = document.getElementById('links_table');
         let wi_link = get_wi_link(tfs_url, wi_id);
-        get_wi(wi_link, 0, (id, fields, links, url, wi_type, icon_url) => { render_root_wi(id, fields, links, url, wi_type, icon_url, true, deep, 'root', placeholder) });
+        get_wi(wi_link, 0, (id, fields, links, url, wi_type, icon_url) => { render_wi(id, fields, links, url, wi_type, icon_url, true, deep, 'root', placeholder) });
     }
 });
 
@@ -15,9 +15,13 @@ function update_header(count) {
     document.getElementById('count').innerText = count;
 }
 
-function render_root_wi(id, fields, links, url, wi_type, icon_url, goto_links, deep, link_type, parent_node) {
+function render_wi(id, fields, links, url, wi_type, icon_url, goto_links, deep, link_type, parent_node) {
     goto_links = goto_links && !already.has(id);
     let parent = parent_node ? parent_node : document;
+
+    let links_parent_div = document.createElement('div');
+    links_parent_div.style.paddingLeft = `${4}0px`;
+    parent.appendChild(links_parent_div);
 
     let wi_div = document.createElement('div');
     wi_div.style.paddingLeft = `${4}0px`;
@@ -50,7 +54,8 @@ function render_root_wi(id, fields, links, url, wi_type, icon_url, goto_links, d
     wi_div.appendChild(fields_lable);
 
     let links_div = document.createElement('div');
-    wi_div.appendChild(links_div);
+    links_div.style.paddingLeft = `${4}0px`;
+    parent.appendChild(links_div);
 
     expand.onclick = function() {
         expand.style.fontWeight = 'normal'; 
@@ -65,13 +70,13 @@ function render_root_wi(id, fields, links, url, wi_type, icon_url, goto_links, d
     };
 
     if (goto_links) {    
-        render_links(links, deep, links_div);
+        render_links(links, deep, links_div, links_parent_div);
     }
     already.set(id, 0);
     update_header(already.size);
 };
 
-function render_links(links, deep, parent_node) {
+function render_links(links, deep, parent_node, node_if_parent) {
     deep += 1;
     for (let link of links) {
         if (link.rel == 'ArtifactLink') //'System.LinkTypes.Related'
@@ -79,9 +84,12 @@ function render_links(links, deep, parent_node) {
         let url = link['url'];
         let link_type = link["attributes"].name;
 
-        //console.log(link.rel);
+        let node = parent_node;
+        if (link_type == 'Parent') {
+            node = node_if_parent;
+        }
 
-        get_wi(url, 0, (id, fields, links, url, wi_type, icon_url) => { render_root_wi(id, fields, links, url, wi_type, icon_url, deep < 1, deep, link_type, parent_node) });
+        get_wi(url, 0, (id, fields, links, url, wi_type, icon_url) => { render_wi(id, fields, links, url, wi_type, icon_url, deep < 1, deep, link_type, node) });
     }
 }
 
