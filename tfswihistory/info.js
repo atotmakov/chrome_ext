@@ -409,7 +409,7 @@ document.addEventListener("DOMContentLoaded", function () {
   var tfs_url = window.location.search.substring(1);
   if (tfs_url) {
     let wi_link = get_wi_link(tfs_url, wi_id);
-    get_wi(wi_link, 0, renderWITitle);
+    get_wi(wi_link, 0, (wi_id, wi_fields, fields_friendly_names, wi_links, html_link, wi_type, icon_url) => { renderWITitle(wi_id, wi_fields, wi_links, html_link, wi_type, icon_url); });
     get_history(tfs_url, wi_id, 0, null, null);
   }
 });

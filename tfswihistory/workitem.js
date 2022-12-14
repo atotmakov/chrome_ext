@@ -36,7 +36,8 @@ function get_wi_icon(tfs_url, wi_id, wi_type, wi_fields, wi_links, html_link, ca
             if (xmlHttp.status === 200) {
                 var obj = JSON.parse(xmlHttp.responseText);
                 var icon_url = obj['icon']['url'];
-                callback(wi_id, wi_fields, wi_links, html_link, wi_type, icon_url);
+                let fields_friendly_names = obj['fields'];
+                callback(wi_id, wi_fields, fields_friendly_names, wi_links, html_link, wi_type, icon_url);
             } else {
                 console.error(xmlHttp.statusText);
             }

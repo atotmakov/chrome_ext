@@ -5,7 +5,7 @@ document.addEventListener("DOMContentLoaded", function () {
         let deep = 0;
         let placeholder = document.getElementById('links_table');
         let wi_link = get_wi_link(tfs_url, wi_id);
-        get_wi(wi_link, 0, (id, fields, links, url, wi_type, icon_url) => { render_wi(id, fields, links, url, wi_type, icon_url, true, deep, 'root', placeholder) });
+        get_wi(wi_link, 0, (id, fields, frienly_names, links, url, wi_type, icon_url) => { render_wi(id, fields, links, url, wi_type, icon_url, true, deep, 'root', placeholder) });
     }
 });
 
@@ -89,7 +89,7 @@ function render_links(links, deep, parent_node, node_if_parent) {
             node = node_if_parent;
         }
 
-        get_wi(url, 0, (id, fields, links, url, wi_type, icon_url) => { render_wi(id, fields, links, url, wi_type, icon_url, deep < 1, deep, link_type, node) });
+        get_wi(url, 0, (id, fields, friendly_names, links, url, wi_type, icon_url) => { render_wi(id, fields, links, url, wi_type, icon_url, deep < 1, deep, link_type, node) });
     }
 }
 

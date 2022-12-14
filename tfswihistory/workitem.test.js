@@ -19,7 +19,7 @@ describe('workttems suite', () => {
     });
 
     test('get_wi_icon url', done => {
-        function callback(wi_id, wi_fields, wi_links, html_link, wi_type, icon_url) {
+        function callback(wi_id, wi_fields, field_names, wi_links, html_link, wi_type, icon_url) {
             try {
                 expect(icon_url).toBe('get_wi_icon_url');
                 done();
@@ -31,7 +31,7 @@ describe('workttems suite', () => {
     });
 
     test('get_wi', done => {
-        function callback(wi_id, wi_fields, wi_links, html_link, wi_type, icon_url) {
+        function callback(wi_id, wi_fields, field_names, wi_links, html_link, wi_type, icon_url) {
             try {
                 let result = { fields: { 'System.WorkItemType': 'witype' }, relations: {}, _links: { 'workItemType': { href: `${host}/get_wi_icon` }, 'html': { href: 'htmllink' } } };
 
