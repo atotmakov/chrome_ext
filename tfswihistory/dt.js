@@ -65,10 +65,12 @@ window.addEventListener('load', function () {
 });
 
 chrome.runtime.onMessage.addListener( (request, sender, sendResponse) => { 
-    if (request.get_workitem_fromDOM) {
+/*    if (request.get_workitem_fromDOM) {
         sendResponse( get_workitem_fromDOM());
-    }
-    if (request.change_time_setting != false) {
+    }*/
+    //console.error(request);
+    //console.error(request.change_time_setting);
+    if (request.change_time_setting == true) {
         setInterval(replace_timestamps, 1000);
     }
 });

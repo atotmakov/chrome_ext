@@ -56,26 +56,33 @@ function change_latest_column(header, items, table_id) {
 
     // Start observing the target node for configured mutations
     observer.observe(targetNode, config);
-    }
+}
 
-    function concatenate_history(fields_history, fieldname) {
-        let result = '';
-        for (var v in fields_history[fieldname]) {
-            result += formatDateTime(fields_history[fieldname][v].val) + ' => ';
-        }
-        return result;
+function concatenate_history(fields_history, fieldname) {
+    let result = '';
+    for (var v in fields_history[fieldname]) {
+        result += formatDateTime(fields_history[fieldname][v].val) + ' => ';
     }
+    return result;
+}
 
-    window.document.onkeydown = (event) => {
-        if (event.key == 'h') {
-            let [header, items, table_id] = get_wis_table()
-            change_latest_column(header, items, table_id);
-        }
-    };
+function get_tfs_url() {
+    let url = window.location.href;
+    let pn = url.indexOf('/_');
+    let f = url.substring(0, pn);
+    return f;
+}
 
-    function get_tfs_url() {
-        let url = window.location.href;
-        let pn = url.indexOf('/_');
-        let f = url.substring(0, pn);
-        return f;
+window.document.onkeydown = (event) => {
+    if (event.key == 'h') {
+        const v = { method: 'getoption', option_name: 'option_calculated_column' };
+        chrome.runtime.sendMessage(v, (response) => { console.log(response); });
     }
+};
+
+chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+    if (request.option_calculated_column == true) {
+        let [header, items, table_id] = get_wis_table();
+        change_latest_column(header, items, table_id);
+    }
+});    

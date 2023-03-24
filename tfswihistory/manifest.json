@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name" : "Azure DevOps workitem info",
   "author" : "atotmakov",
-  "version" : "0.0.0.11",
+  "version" : "0.0.0.12",
   "description" : "Get info for Azure DevOps workitems, including history data",
   "background" : { "service_worker": "background.js" },
   "content_scripts": [
